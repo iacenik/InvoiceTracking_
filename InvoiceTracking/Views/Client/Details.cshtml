@@ -1,0 +1,38 @@
+﻿@model EntityLayer.Entities.Client
+
+@{
+    ViewData["Title"] = "Müşteri Detayları";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Şirket Adı</th>
+        <td>@Model.CompanyName</td>
+    </tr>
+    <tr>
+        <th>Ülke</th>
+        <td>@Model.Country</td>
+    </tr>
+    <tr>
+        <th>Adres</th>
+        <td>@Model.Address</td>
+    </tr>
+    <tr>
+        <th>Banka</th>
+        <td>@Model.BankName</td>
+    </tr>
+    <tr>
+        <th>IBAN</th>
+        <td>@Model.Iban</td>
+    </tr>
+    <tr>
+        <th>Eklenme Tarihi</th>
+        <td>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+    </tr>
+</table>
+
+<a asp-action="Edit" asp-route-id="@Model.ClientId" class="btn btn-warning">Düzenle</a>
+<a asp-action="Index" class="btn btn-secondary">Geri</a>

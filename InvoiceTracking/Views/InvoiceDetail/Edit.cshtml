@@ -1,0 +1,49 @@
+﻿@model EntityLayer.Entities.InvoiceDetail
+
+@{
+    ViewData["Title"] = "Fatura Detayı Düzenle";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="InvoiceDetailId" />
+
+    <div class="mb-3">
+        <label class="form-label">Fatura ID</label>
+        <select asp-for="InvoiceId" asp-items="ViewBag.InvoiceId" class="form-select">
+            <option value="">Fatura Seçiniz</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Ürün</label>
+        <select asp-for="ItemId" asp-items="ViewBag.ItemId" class="form-select">
+            <option value="">Ürün Seçiniz</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Miktar</label>
+        <input asp-for="Quantity" class="form-control" type="number" min="1" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Birim Fiyat</label>
+        <input asp-for="UnitPrice" class="form-control" type="number" step="0.01" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Para Birimi</label>
+        <select asp-for="Currency" class="form-select">
+            <option value="RON">RON</option>
+            <option value="EUR">EUR</option>
+            <option value="USD">USD</option>
+            <option value="TL">TL</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-success">Güncelle</button>
+    <a asp-action="Index" class="btn btn-secondary">İptal</a>
+</form>

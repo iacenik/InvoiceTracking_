@@ -1,0 +1,33 @@
+﻿@model EntityLayer.Entities.PaymentDetail
+
+@{
+    ViewData["Title"] = "Ödeme Detayını Güncelle";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="mb-4">@ViewData["Title"]</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="PaymentDetailId" />
+
+    <div class="mb-3">
+        <label asp-for="PaymentId" class="form-label">Ödeme</label>
+        <select asp-for="PaymentId" class="form-select" asp-items="ViewBag.PaymentId">
+            <option value="">Ödeme Seçin</option>
+        </select>
+        <span asp-validation-for="PaymentId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Ürünler</label>
+        <textarea asp-for="SoldProducts" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="SoldProducts" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-warning">
+        <i class="fas fa-edit"></i> Güncelle
+    </button>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Geri
+    </a>
+</form>

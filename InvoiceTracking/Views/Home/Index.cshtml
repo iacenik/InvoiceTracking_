@@ -1,0 +1,152 @@
+﻿@model EntityLayer.Entities.CashRegister
+
+@{
+    ViewData["Title"] = "Kasa Durumu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="mb-4"><i class="fas fa-cash-register"></i> Kasa Durumu</h2>
+
+<div class="row">
+    @if (Model != null)
+    {
+        <!-- EUR Kartları -->
+        <div class="col-md-4">
+            <div class="card shadow-sm animated-card bg-primary text-white">
+                <div class="card-header"><i class="fas fa-euro-sign"></i> EUR Gelir</div>
+                <div class="card-body">
+                    <h4 class="card-title amount" data-value="@Model.TotalIncomeEUR">@Model.TotalIncomeEUR.ToString("N2") €</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm animated-card bg-danger text-white">
+                <div class="card-header"><i class="fas fa-euro-sign"></i> EUR Gider</div>
+                <div class="card-body">
+                    <h4 class="card-title amount" data-value="@Model.TotalExpenseEUR">@Model.TotalExpenseEUR.ToString("N2") €</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm animated-card bg-success text-white">
+                <div class="card-header"><i class="fas fa-euro-sign"></i> EUR Bakiye</div>
+                <div class="card-body">
+                    <h4 class="card-title amount" data-value="@Model.BalanceEUR">@Model.BalanceEUR.ToString("N2") €</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- RON Kartları -->
+        <div class="col-md-4">
+            <div class="card shadow-sm animated-card bg-primary text-white">
+                <div class="card-header"><i class="fas fa-money-bill-wave"></i> RON Gelir</div>
+                <div class="card-body">
+                    <h4 class="card-title amount" data-value="@Model.TotalIncomeRON">@Model.TotalIncomeRON.ToString("N2") RON</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm animated-card bg-danger text-white">
+                <div class="card-header"><i class="fas fa-money-bill-wave"></i> RON Gider</div>
+                <div class="card-body">
+                    <h4 class="card-title amount" data-value="@Model.TotalExpenseRON">@Model.TotalExpenseRON.ToString("N2") RON</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm animated-card bg-success text-white">
+                <div class="card-header"><i class="fas fa-money-bill-wave"></i> RON Bakiye</div>
+                <div class="card-body">
+                    <h4 class="card-title amount" data-value="@Model.BalanceRON">@Model.BalanceRON.ToString("N2") RON</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- USD Kartları -->
+        <div class="col-md-4">
+            <div class="card shadow-sm animated-card bg-primary text-white">
+                <div class="card-header"><i class="fas fa-dollar-sign"></i> USD Gelir</div>
+                <div class="card-body">
+                    <h4 class="card-title amount" data-value="@Model.TotalIncomeUSD">@Model.TotalIncomeUSD.ToString("N2") $</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm animated-card bg-danger text-white">
+                <div class="card-header"><i class="fas fa-dollar-sign"></i> USD Gider</div>
+                <div class="card-body">
+                    <h4 class="card-title amount" data-value="@Model.TotalExpenseUSD">@Model.TotalExpenseUSD.ToString("N2") $</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm animated-card bg-success text-white">
+                <div class="card-header"><i class="fas fa-dollar-sign"></i> USD Bakiye</div>
+                <div class="card-body">
+                    <h4 class="card-title amount" data-value="@Model.BalanceUSD">@Model.BalanceUSD.ToString("N2") $</h4>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning text-center">
+            <i class="fas fa-exclamation-triangle"></i> Kasa bilgisi bulunamadı. Lütfen bir kayıt ekleyin.
+        </div>
+    }
+</div>
+
+<a asp-action="Index" class="btn btn-secondary">
+    <i class="fas fa-arrow-left"></i> Geri Dön
+</a>
+
+@section Scripts {
+    <script>
+        // Sayıların animasyonlu olarak artmasını sağla
+        document.addEventListener("DOMContentLoaded", function () {
+            let counters = document.querySelectorAll(".amount");
+            counters.forEach(counter => {
+                let target = parseFloat(counter.getAttribute("data-value"));
+                let start = 0;
+                let duration = 2000; // 2 saniyede tamamlanacak
+                let increment = target / (duration / 10);
+
+                function updateCounter() {
+                    start += increment;
+                    if (start >= target) {
+                        counter.textContent = target.toLocaleString("tr-TR", { minimumFractionDigits: 2 }) + " " + counter.textContent.split(" ")[1];
+                    } else {
+                        counter.textContent = start.toLocaleString("tr-TR", { minimumFractionDigits: 2 }) + " " + counter.textContent.split(" ")[1];
+                        requestAnimationFrame(updateCounter);
+                    }
+                }
+
+                updateCounter();
+            });
+        });
+
+        // Kartlara yumuşak animasyon ekleyelim
+        document.addEventListener("DOMContentLoaded", function () {
+            let cards = document.querySelectorAll(".animated-card");
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add("fade-in");
+                }, index * 150);
+            });
+        });
+    </script>
+
+    <style>
+        /* Kartlara yumuşak animasyon efekti */
+        .animated-card {
+            transform: translateY(20px);
+            opacity: 0;
+            transition: transform 0.5s ease, opacity 0.5s ease;
+        }
+
+        .animated-card.fade-in {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+}

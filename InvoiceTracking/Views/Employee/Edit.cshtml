@@ -1,0 +1,21 @@
+﻿@model EntityLayer.Entities.Employee
+
+@{
+    ViewData["Title"] = "Çalışan Güncelle";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="EmployeeId" />
+    <div class="form-group">
+        <label asp-for="EmployeeName" class="control-label"></label>
+        <input asp-for="EmployeeName" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="EmployeeSurname" class="control-label"></label>
+        <input asp-for="EmployeeSurname" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Güncelle</button>
+</form>

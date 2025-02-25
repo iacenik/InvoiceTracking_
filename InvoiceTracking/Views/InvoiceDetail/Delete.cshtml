@@ -1,0 +1,20 @@
+﻿@model EntityLayer.Entities.InvoiceDetail
+
+@{
+    ViewData["Title"] = "Fatura Detayı";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div>
+    <p><strong>Fatura ID:</strong> @Model.InvoiceId</p>
+    <p><strong>Ürün:</strong> @Model.Item?.ItemName</p>
+    <p><strong>Miktar:</strong> @Model.Quantity</p>
+    <p><strong>Birim Fiyat:</strong> @Model.UnitPrice.ToString("N2")</p>
+    <p><strong>Toplam Fiyat:</strong> @Model.TotalPrice.ToString("N2")</p>
+    <p><strong>Para Birimi:</strong> @Model.Currency</p>
+</div>
+
+<a asp-action="Edit" asp-route-id="@Model.InvoiceDetailId" class="btn btn-warning">Düzenle</a>
+<a asp-action="Index" class="btn btn-secondary">Geri</a>

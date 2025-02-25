@@ -1,0 +1,21 @@
+﻿@model EntityLayer.Entities.Invoice
+
+@{
+    ViewData["Title"] = "Fatura Sil";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<p>Bu faturayı silmek istediğinizden emin misiniz?</p>
+
+<div>
+    <p><strong>Müşteri:</strong> @Model.Client?.CompanyName</p>
+    <p><strong>Tutar:</strong> @Model.TotalAmount @Model.Currency</p>
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="InvoiceId" />
+    <button type="submit" class="btn btn-danger">Sil</button>
+    <a asp-action="Index" class="btn btn-secondary">İptal</a>
+</form>

@@ -1,0 +1,57 @@
+﻿@model IEnumerable<EntityLayer.Entities.Invoice>
+
+@{
+    ViewData["Title"] = "Faturalar Listesi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<a asp-action="Create" class="btn btn-primary mb-3">+ Yeni Fatura Ekle</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Tarih</th>
+            <th>Müşteri</th>
+            <th>Çalışan</th>
+            <th>Kategori</th>
+            <th>Tutar</th>
+            <th>Para Birimi</th>
+            <th>Ödeme Durumu</th>
+            <th>İşlemler</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var invoice in Model)
+        {
+            <tr>
+                <td>@invoice.Date.ToString("dd/MM/yyyy")</td>
+                <td>@invoice.Client?.CompanyName</td>
+                <td>@invoice.Employee?.EmployeeName</td>
+                <td>@invoice.Category?.CategoryName</td>
+                <td>@invoice.TotalAmount.ToString("N2")</td>
+                <td>@invoice.Currency</td>
+                <td>
+                    @if (invoice.IsPaid)
+                    {
+                        <span class="badge bg-success">Ödendi</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Ödenmedi</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@invoice.InvoiceId" class="btn btn-info btn-sm">Detay</a>
+                    <a asp-action="Edit" asp-route-id="@invoice.InvoiceId" class="btn btn-warning btn-sm">Düzenle</a>
+                    <a asp-action="Delete" asp-route-id="@invoice.InvoiceId" class="btn btn-danger btn-sm">Sil</a>
+                    @if (!invoice.IsPaid)
+                    {
+                        <a asp-action="MarkAsPaid" asp-route-id="@invoice.InvoiceId" class="btn btn-success btn-sm">Ödendi</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

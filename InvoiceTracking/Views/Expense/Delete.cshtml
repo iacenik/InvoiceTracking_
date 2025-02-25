@@ -1,0 +1,22 @@
+﻿@model EntityLayer.Entities.Expense
+
+@{
+    ViewData["Title"] = "Gider Sil";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="mb-4">@ViewData["Title"]</h2>
+
+<p>Bu gideri silmek istediğinize emin misiniz?</p>
+
+<table class="table">
+    <tr><th>Kategori</th><td>@Model.Category?.CategoryName</td></tr>
+    <tr><th>Çalışan</th><td>@Model.Employee?.EmployeeName</td></tr>
+    <tr><th>Tutar</th><td>@Model.Amount.ToString("N2")</td></tr>
+</table>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="ExpenseId" />
+    <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Sil</button>
+    <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Geri</a>
+</form>

@@ -1,0 +1,46 @@
+﻿@model EntityLayer.Entities.ExpenseCategory
+
+@{
+    ViewData["Title"] = "Gider Kategorisi Detayları";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div>
+    <p><strong>Kategori Adı:</strong> @Model.CategoryName</p>
+    <p><strong>Açıklama:</strong> @Model.Description</p>
+</div>
+
+<h4>📌 Bu Kategoriye Ait Giderler</h4>
+@if (Model.Expenses.Any())
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Tarih</th>
+                <th>Tutar</th>
+                <th>Para Birimi</th>
+                <th>Çalışan</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var expense in Model.Expenses)
+            {
+                <tr>
+                    <td>@expense.Date.ToString("dd/MM/yyyy")</td>
+                    <td>@expense.Amount.ToString("N2")</td>
+                    <td>@expense.Currency</td>
+                    <td>@expense.Employee?.EmployeeName</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Bu kategoriye ait gider bulunmamaktadır.</p>
+}
+
+<a asp-action="Edit" asp-route-id="@Model.CategoryId" class="btn btn-warning">Düzenle</a>
+<a asp-action="Index" class="btn btn-secondary">Geri</a>

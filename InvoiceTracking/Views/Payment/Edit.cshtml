@@ -1,0 +1,14 @@
+﻿@model EntityLayer.Entities.Payment
+
+@{
+    ViewData["Title"] = "Ödeme Güncelle";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="mb-4">@ViewData["Title"]</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="PaymentId" />
+
+    <partial name="Create" />
+</form>
