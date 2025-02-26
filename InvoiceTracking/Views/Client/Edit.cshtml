@@ -1,53 +1,32 @@
 ﻿@model EntityLayer.Entities.Client
 
 @{
-    ViewData["Title"] = "Müşteri Düzenle";
+    ViewData["Title"] = "Müşteri Güncelle";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="container mt-4">
+    <h2 class="text-center">Müşteri Güncelle</h2>
 
-<form asp-action="Edit">
-    <input type="hidden" asp-for="ClientId" />
+    <form asp-action="Edit" method="post" class="shadow p-4 bg-light rounded">
+        <input type="hidden" asp-for="ClientId" />
 
-    <div class="form-group">
-        <label asp-for="ClientCode" class="control-label"></label>
-        <input asp-for="ClientCode" class="form-control" />
-        <span asp-validation-for="ClientCode" class="text-danger"></span>
-    </div>
+        <div class="mb-3">
+            <label class="form-label">Firma Adı</label>
+            <input asp-for="CompanyName" class="form-control" required />
+        </div>
 
-    <div class="form-group">
-        <label asp-for="CompanyName" class="control-label"></label>
-        <input asp-for="CompanyName" class="form-control" />
-        <span asp-validation-for="CompanyName" class="text-danger"></span>
-    </div>
+        <div class="mb-3">
+            <label class="form-label">Ülke</label>
+            <input asp-for="Country" class="form-control" required />
+        </div>
 
-    <div class="form-group">
-        <label asp-for="Country" class="control-label"></label>
-        <input asp-for="Country" class="form-control" />
-        <span asp-validation-for="Country" class="text-danger"></span>
-    </div>
+        <div class="mb-3">
+            <label class="form-label">IBAN</label>
+            <input asp-for="Iban" class="form-control" />
+        </div>
 
-    <div class="form-group">
-        <label asp-for="Address" class="control-label"></label>
-        <input asp-for="Address" class="form-control" />
-    </div>
-
-    <div class="form-group">
-        <label asp-for="BankName" class="control-label"></label>
-        <input asp-for="BankName" class="form-control" />
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Iban" class="control-label"></label>
-        <input asp-for="Iban" class="form-control" />
-    </div>
-
-    <div class="form-group">
-        <label asp-for="CreatedAt" class="control-label"></label>
-        <input asp-for="CreatedAt" class="form-control" readonly />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Güncelle</button>
-    <a asp-action="Index" class="btn btn-secondary">İptal</a>
-</form>
+        <button type="submit" class="btn btn-primary">Güncelle</button>
+        <a asp-action="Index" class="btn btn-secondary">İptal</a>
+    </form>
+</div>

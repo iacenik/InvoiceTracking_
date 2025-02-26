@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using static EntityLayer.Entities.Enums;
 
 namespace EntityLayer.Entities
 {
@@ -12,7 +13,7 @@ namespace EntityLayer.Entities
         // 🔹 EUR Cinsinden Toplam Gelir ve Gider
         [Required]
         [Column(TypeName = "decimal(18,2)")]
-        public decimal TotalIncomeEUR { get; set; } = 0m; // ✅ Varsayılan değer eklendi
+        public decimal TotalIncomeEUR { get; set; } = 0m;
 
         [Required]
         [Column(TypeName = "decimal(18,2)")]
@@ -45,5 +46,22 @@ namespace EntityLayer.Entities
 
         [NotMapped]
         public decimal BalanceUSD => TotalIncomeUSD - TotalExpenseUSD;
+
+        // ✅ **Kasadan gider düşen yeni metot**
+        public void DeductExpense(decimal amount, CurrencyType currency)
+        {
+            switch (currency)
+            {
+                case CurrencyType.EUR:
+                    TotalExpenseEUR += amount;
+                    break;
+                case CurrencyType.RON:
+                    TotalExpenseRON += amount;
+                    break;
+                case CurrencyType.USD:
+                    TotalExpenseUSD += amount;
+                    break;
+            }
+        }
     }
 }

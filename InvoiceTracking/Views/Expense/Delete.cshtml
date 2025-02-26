@@ -5,18 +5,17 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2 class="mb-4">@ViewData["Title"]</h2>
+<h2 class="text-center text-danger my-4">Gider Silme</h2>
 
-<p>Bu gideri silmek istediğinize emin misiniz?</p>
+<div class="card shadow p-4">
+    <h4 class="text-center text-danger">Bu gideri silmek istediğinizden emin misiniz?</h4>
+    <p class="text-center"><strong>@Model.Description</strong></p>
 
-<table class="table">
-    <tr><th>Kategori</th><td>@Model.Category?.CategoryName</td></tr>
-    <tr><th>Çalışan</th><td>@Model.Employee?.EmployeeName</td></tr>
-    <tr><th>Tutar</th><td>@Model.Amount.ToString("N2")</td></tr>
-</table>
-
-<form asp-action="DeleteConfirmed" method="post">
-    <input type="hidden" asp-for="ExpenseId" />
-    <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Sil</button>
-    <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Geri</a>
-</form>
+    <form asp-action="DeleteConfirmed">
+        <input type="hidden" asp-for="ExpenseId" />
+        <div class="text-center mt-3">
+            <button type="submit" class="btn btn-danger">Sil</button>
+            <a asp-action="Index" class="btn btn-secondary">İptal</a>
+        </div>
+    </form>
+</div>

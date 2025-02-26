@@ -1,49 +1,27 @@
 ﻿@model EntityLayer.Entities.Invoice
 
-@{
-    ViewData["Title"] = "Yeni Fatura Ekle";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
-
-<h2>@ViewData["Title"]</h2>
+<h2>Create Invoice</h2>
 
 <form asp-action="Create" method="post">
-    <div class="mb-3">
-        <label class="form-label">Tarih</label>
-        <input asp-for="Date" type="date" class="form-control" />
+    <div class="form-group">
+        <label for="ClientId">Client</label>
+        <select asp-for="ClientId" asp-items="ViewBag.Clients" class="form-control"></select>
     </div>
-
-    <div class="mb-3">
-        <label class="form-label">Müşteri</label>
-        <select asp-for="ClientId" asp-items="ViewBag.ClientId" class="form-select">
-            <option value="">Müşteri Seçiniz</option>
-        </select>
+    <div class="form-group">
+        <label for="Date">Date</label>
+        <input asp-for="Date" class="form-control" type="date" />
     </div>
-
-    <div class="mb-3">
-        <label class="form-label">Çalışan</label>
-        <select asp-for="EmployeeId" asp-items="ViewBag.EmployeeId" class="form-select">
-            <option value="">Çalışan Seçiniz</option>
-        </select>
+    <div class="form-group">
+        <label for="TotalAmount">Total Amount</label>
+        <input asp-for="TotalAmount" class="form-control" />
     </div>
-
-    <div class="mb-3">
-        <label class="form-label">Kategori</label>
-        <select asp-for="CategoryId" asp-items="ViewBag.CategoryId" class="form-select">
-            <option value="">Kategori Seçiniz</option>
-        </select>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Para Birimi</label>
-        <select asp-for="Currency" class="form-select">
-            <option value="RON">RON</option>
+    <div class="form-group">
+        <label for="Currency">Currency</label>
+        <select asp-for="Currency" class="form-control">
             <option value="EUR">EUR</option>
+            <option value="RON">RON</option>
             <option value="USD">USD</option>
-            <option value="TL">TL</option>
         </select>
     </div>
-
-    <button type="submit" class="btn btn-success">Kaydet</button>
-    <a asp-action="Index" class="btn btn-secondary">İptal</a>
+    <button type="submit" class="btn btn-success">Save</button>
 </form>

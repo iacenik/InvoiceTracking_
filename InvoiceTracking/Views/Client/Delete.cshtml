@@ -5,39 +5,19 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="container mt-4">
+    <h2 class="text-danger text-center">Müşteri Sil</h2>
 
-<h3>Bu müşteriyi silmek istediğinizden emin misiniz?</h3>
+    <p class="text-center">Bu müşteriyi silmek istediğinize emin misiniz?</p>
 
-<table class="table table-bordered">
-    <tr>
-        <th>Şirket Adı</th>
-        <td>@Model.CompanyName</td>
-    </tr>
-    <tr>
-        <th>Ülke</th>
-        <td>@Model.Country</td>
-    </tr>
-    <tr>
-        <th>Adres</th>
-        <td>@Model.Address</td>
-    </tr>
-    <tr>
-        <th>Banka</th>
-        <td>@Model.BankName</td>
-    </tr>
-    <tr>
-        <th>IBAN</th>
-        <td>@Model.Iban</td>
-    </tr>
-    <tr>
-        <th>Eklenme Tarihi</th>
-        <td>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-    </tr>
-</table>
+    <h4 class="text-center"><strong>@Model.CompanyName</strong></h4>
 
-<form asp-action="Delete">
-    <input type="hidden" asp-for="ClientId" />
-    <button type="submit" class="btn btn-danger">Sil</button>
-    <a asp-action="Index" class="btn btn-secondary">İptal</a>
-</form>
+    <form asp-action="DeleteConfirmed" method="post">
+        <input type="hidden" asp-for="ClientId" />
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-danger">Sil</button>
+            <a asp-action="Index" class="btn btn-secondary">İptal</a>
+        </div>
+    </form>
+</div>

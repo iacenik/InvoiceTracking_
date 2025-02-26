@@ -1,136 +1,137 @@
-﻿using BusinessLayer.Common;
+﻿using BusinessLayer.Services;
 using EntityLayer.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BusinessLayer.Common;
 
-namespace InvoiceTracking.Controllers
+namespace InvoiceSystem.Controllers
 {
     public class InvoiceController : Controller
     {
-        private readonly IInvoiceRepository _invoiceRepository;
-        private readonly IClientRepository _clientRepository;
-        private readonly IEmployeeRepository _employeeRepository;
-        private readonly IExpenseCategoryRepository _categoryRepository;
+        private readonly IInvoiceService _invoiceService;
+        private readonly IClientService _clientService;
+        private readonly ICashRegisterService _cashRegisterService;
+        private readonly IInvoiceDetailService _invoiceDetailService;
 
-        public InvoiceController(IInvoiceRepository invoiceRepository, IClientRepository clientRepository, IEmployeeRepository employeeRepository, IExpenseCategoryRepository categoryRepository)
+        public InvoiceController(
+            IInvoiceService invoiceService,
+            IClientService clientService,
+            ICashRegisterService cashRegisterService,
+            IInvoiceDetailService invoiceDetailService)
         {
-            _invoiceRepository = invoiceRepository;
-            _clientRepository = clientRepository;
-            _employeeRepository = employeeRepository;
-            _categoryRepository = categoryRepository;
+            _invoiceService = invoiceService;
+            _clientService = clientService;
+            _cashRegisterService = cashRegisterService;
+            _invoiceDetailService = invoiceDetailService;
         }
 
-        // 📌 Tüm Faturaları Listeleme
+        // 📌 1️⃣ Tüm faturaları listele
         public async Task<IActionResult> Index()
         {
-            var invoices = await _invoiceRepository.GetAllInvoicesAsync();
+            var invoices = await _invoiceService.GetAllInvoicesAsync();
             return View(invoices);
         }
 
-        // 📌 Fatura Detayları
-        public async Task<IActionResult> Details(int id)
-        {
-            var invoice = await _invoiceRepository.GetInvoiceByIdAsync(id);
-            if (invoice == null)
-                return NotFound();
-
-            return View(invoice);
-        }
-
-        // 📌 Yeni Fatura Ekleme Sayfası (Form Göster)
+        // 📌 2️⃣ Yeni fatura ekleme sayfası
         public async Task<IActionResult> Create()
         {
-            ViewData["ClientId"] = new SelectList(await _clientRepository.GetAllClientsAsync(), "ClientId", "CompanyName");
-            ViewData["EmployeeId"] = new SelectList(await _employeeRepository.GetAllEmployeesAsync(), "EmployeeId", "EmployeeName");
-            ViewData["CategoryId"] = new SelectList(await _categoryRepository.GetAllExpenseCategoriesAsync(), "CategoryId", "CategoryName");
-
+            await PopulateDropDowns();
             return View();
         }
 
-        // 📌 Yeni Fatura Ekleme (Form POST)
+        // 📌 3️⃣ Yeni fatura ekleme işlemi
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Invoice invoice)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                await _invoiceRepository.AddInvoiceAsync(invoice);
-                return RedirectToAction(nameof(Index));
+                await PopulateDropDowns();
+                return View(invoice);
             }
 
-            ViewData["ClientId"] = new SelectList(await _clientRepository.GetAllClientsAsync(), "ClientId", "CompanyName", invoice.ClientId);
-            ViewData["EmployeeId"] = new SelectList(await _employeeRepository.GetAllEmployeesAsync(), "EmployeeId", "EmployeeName", invoice.EmployeeId);
-            ViewData["CategoryId"] = new SelectList(await _categoryRepository.GetAllExpenseCategoriesAsync(), "CategoryId", "CategoryName", invoice.CategoryId);
-
-            return View(invoice);
+            await _invoiceService.AddInvoiceAsync(invoice);
+            return RedirectToAction(nameof(Index));
         }
 
-        // 📌 Fatura Güncelleme Sayfası (Form Göster)
+        // 📌 4️⃣ Fatura güncelleme sayfası
         public async Task<IActionResult> Edit(int id)
         {
-            var invoice = await _invoiceRepository.GetInvoiceByIdAsync(id);
+            var invoice = await _invoiceService.GetInvoicesByClientIdAsync(id);
             if (invoice == null)
                 return NotFound();
 
-            ViewData["ClientId"] = new SelectList(await _clientRepository.GetAllClientsAsync(), "ClientId", "CompanyName", invoice.ClientId);
-            ViewData["EmployeeId"] = new SelectList(await _employeeRepository.GetAllEmployeesAsync(), "EmployeeId", "EmployeeName", invoice.EmployeeId);
-            ViewData["CategoryId"] = new SelectList(await _categoryRepository.GetAllExpenseCategoriesAsync(), "CategoryId", "CategoryName", invoice.CategoryId);
-
-            return View(invoice);
+            await PopulateDropDowns(invoice.FirstOrDefault());
+            return View(invoice.FirstOrDefault());
         }
 
-        // 📌 Fatura Güncelleme (Form POST)
+        // 📌 5️⃣ Fatura güncelleme işlemi
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Invoice invoice)
+        public async Task<IActionResult> Edit(Invoice invoice)
         {
-            if (id != invoice.InvoiceId)
+            if (!ModelState.IsValid)
+            {
+                await PopulateDropDowns(invoice);
+                return View(invoice);
+            }
+
+            await _invoiceService.UpdateInvoiceAsync(invoice);
+            return RedirectToAction(nameof(Index));
+        }
+
+        // 📌 6️⃣ Fatura silme işlemi
+        public async Task<IActionResult> Delete(int id)
+        {
+            var invoice = await _invoiceService.GetInvoicesByClientIdAsync(id);
+            if (invoice == null)
                 return NotFound();
 
-            if (ModelState.IsValid)
+            return View(invoice.FirstOrDefault());
+        }
+
+        [HttpPost, ActionName("Delete")]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            await _invoiceService.DeleteInvoiceAsync(id);
+            return RedirectToAction(nameof(Index));
+        }
+
+        // 📌 7️⃣ Belirli bir müşteriye ait faturaları listeleme
+        public async Task<IActionResult> ClientInvoices(int clientId)
+        {
+            var invoices = await _invoiceService.GetInvoicesByClientIdAsync(clientId);
+            return View("Index", invoices);
+        }
+
+        // 📌 8️⃣ Fatura onaylama (Kasadan düşme işlemi)
+        public async Task<IActionResult> ApproveInvoice(int invoiceId)
+        {
+            var cashRegister = await _cashRegisterService.GetFirstAsync();
+            if (cashRegister == null)
             {
-                await _invoiceRepository.UpdateInvoiceAsync(invoice);
+                ModelState.AddModelError("", "Kasa bulunamadı!");
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["ClientId"] = new SelectList(await _clientRepository.GetAllClientsAsync(), "ClientId", "CompanyName", invoice.ClientId);
-            ViewData["EmployeeId"] = new SelectList(await _employeeRepository.GetAllEmployeesAsync(), "EmployeeId", "EmployeeName", invoice.EmployeeId);
-            ViewData["CategoryId"] = new SelectList(await _categoryRepository.GetAllExpenseCategoriesAsync(), "CategoryId", "CategoryName", invoice.CategoryId);
-
-            return View(invoice);
-        }
-
-        // 📌 Fatura Silme Sayfası (Onay İçin)
-        public async Task<IActionResult> Delete(int id)
-        {
-            var invoice = await _invoiceRepository.GetInvoiceByIdAsync(id);
-            if (invoice == null)
-                return NotFound();
-
-            return View(invoice);
-        }
-
-        // 📌 Fatura Silme İşlemi
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            await _invoiceRepository.DeleteInvoiceAsync(id);
+            await _invoiceService.ApproveInvoiceAsync(invoiceId, cashRegister);
             return RedirectToAction(nameof(Index));
         }
 
-        // 📌 Faturayı Ödendi Olarak İşaretleme
-        public async Task<IActionResult> MarkAsPaid(int id)
+        // 📌 9️⃣ Fatura detaylarını listeleme
+        public async Task<IActionResult> InvoiceDetails(int invoiceId)
         {
-            var invoice = await _invoiceRepository.GetInvoiceByIdAsync(id);
-            if (invoice == null)
-                return NotFound();
+            var details = await _invoiceDetailService.GetDetailsByInvoiceIdAsync(invoiceId);
+            return View(details);
+        }
 
-            invoice.IsPaid = true;
-            await _invoiceRepository.UpdateInvoiceAsync(invoice);
-
-            return RedirectToAction(nameof(Index));
+        // 📌 🔥 Form dropdownlarını doldurma metodu
+        private async Task PopulateDropDowns(Invoice? invoice = null)
+        {
+            var clients = await _clientService.GetAllClientsAsync();
+            ViewBag.Clients = new SelectList(clients, "ClientId", "CompanyName", invoice?.ClientId);
         }
     }
-
 }

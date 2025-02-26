@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq; 
-using static EntityLayer.Entities.Enums; 
+using System.Linq;
+using static EntityLayer.Entities.Enums;
 
 namespace EntityLayer.Entities
 {
@@ -19,29 +19,39 @@ namespace EntityLayer.Entities
         [Required]
         public int CategoryId { get; set; } // Gider kategorisi
         [ForeignKey("CategoryId")]
-        public virtual ExpenseCategory? Category { get; set; } // 🔗 Gider kategorisi ile bağlantı
+        public virtual ExpenseCategory? Category { get; set; }
 
         [Required]
-        public int EmployeeId { get; set; } // Harcamayı yapan çalışan
+        public int EmployeeId { get; set; }
         [ForeignKey("EmployeeId")]
-        public virtual Employee? Employee { get; set; } 
+        public virtual Employee? Employee { get; set; }
 
-        public virtual ICollection<InvoiceDetail> InvoiceDetails { get; set; } = new List<InvoiceDetail>(); // 🔗 Fatura detayları
+        public virtual ICollection<InvoiceDetail> InvoiceDetails { get; set; } = new List<InvoiceDetail>();
 
-        [NotMapped] // Veritabanına kaydedilmez
-        public decimal TotalAmount => InvoiceDetails?.Sum(d => d.TotalPrice) ?? 0; 
-
-        [Required]
-        public CurrencyType Currency { get; set; } // 🔗 Para birimi (RON, EUR, USD, TL)
+        [NotMapped]
+        public decimal TotalAmount => InvoiceDetails?.Sum(d => d.TotalPrice) ?? 0;
 
         [Required]
-        public InvoiceType InvoiceType { get; set; } // 🔗 Fatura Tipi (A, B, C)
+        public CurrencyType Currency { get; set; }
 
-        public bool IsPaid { get; set; } = false; // 🔍 Fatura ödendi mi?
+        [Required]
+        public InvoiceType InvoiceType { get; set; }
+
+        public bool IsPaid { get; set; } = false;
 
         [Required]
         public int ClientId { get; set; }
         [ForeignKey("ClientId")]
         public virtual Client? Client { get; set; }
+
+        // ✅ Fatura onaylandığında kasadan düş
+        public void ApproveInvoice(CashRegister cashRegister)
+        {
+            if (!IsPaid) // Eğer zaten ödendiyse tekrar düşmesin
+            {
+                cashRegister.DeductExpense(TotalAmount, Currency); // ✅ Kasadan düş
+                IsPaid = true; // ✅ Fatura ödendi olarak işaretlendi
+            }
+        }
     }
 }

@@ -1,0 +1,34 @@
+﻿@model List<EntityLayer.Entities.Invoice>
+
+@{
+    ViewData["Title"] = "Müşteri Faturaları";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="text-center">Müşteri Faturaları</h2>
+
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Fatura No</th>
+                <th>Tarih</th>
+                <th>Tutar</th>
+                <th>Durum</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var invoice in Model)
+            {
+                <tr>
+                    <td>@invoice.InvoiceId</td>
+                    <td>@invoice.Date.ToShortDateString()</td>
+                    <td>@invoice.TotalAmount @invoice.Currency</td>
+                    <td>@(invoice.IsPaid ? "Ödendi" : "Ödenmedi")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <a asp-action="Index" class="btn btn-secondary">Geri</a>
+</div>

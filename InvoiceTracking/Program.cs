@@ -1,4 +1,5 @@
 using BusinessLayer.Common;
+using BusinessLayer.Services;
 using DataAccessLayer.Data;
 using DataAccessLayer.Repository;
 using Microsoft.EntityFrameworkCore;
@@ -10,17 +11,32 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add services to the container.
-builder.Services.AddScoped<ICashRegisterRepository, CashRegisterRepository>();
-builder.Services.AddScoped<IClientRepository, ClientRepository>();
+// Repository Register
+
+builder.Services.AddScoped<IClientRepository, ClientRepository >();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-builder.Services.AddScoped<IExpenseCategoryRepository, ExpenseCategoryRepository>();
 builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
+builder.Services.AddScoped<IExpenseCategoryRepository, ExpenseCategoryRepository>();
 builder.Services.AddScoped<IInvoiceDetailRepository, InvoiceDetailRepository>();
 builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
-builder.Services.AddScoped<IItemRepository, ItemRepository>();
-builder.Services.AddScoped<IPaymentDetailRepository, PaymentDetailRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IPaymentDetailRepository, PaymentDetailRepository>();
+builder.Services.AddScoped<ICashRegisterRepository, CashRegisterRepository>();
+
+
+
+// Service Register
+builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();    
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<IExpenseCategoryService, ExpenseCategoryService>();
+builder.Services.AddScoped<IInvoiceDetailService, InvoiceDetailService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IPaymentDetailService, PaymentDetailService>();
+builder.Services.AddScoped<ICashRegisterService, CashRegisterService>();
+// Add services to the container.
+
 builder.Services.AddHttpClient();
 
 

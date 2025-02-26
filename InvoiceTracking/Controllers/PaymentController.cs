@@ -1,122 +1,121 @@
-﻿using BusinessLayer.Common;
+﻿using BusinessLayer.Services;
 using EntityLayer.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using BusinessLayer.Common;
 
-namespace InvoiceTracking.Controllers
+namespace InvoiceSystem.Controllers
 {
     public class PaymentController : Controller
     {
-        private readonly IPaymentRepository _paymentRepository;
-        private readonly IClientRepository _clientRepository;
-        private readonly ICashRegisterRepository _cashRegisterRepository;
+        private readonly IPaymentService _paymentService;
+        private readonly IClientService _clientService;
+        private readonly ICashRegisterService _cashRegisterService;
 
-        public PaymentController(IPaymentRepository paymentRepository, IClientRepository clientRepository, ICashRegisterRepository cashRegisterRepository)
+        public PaymentController(
+            IPaymentService paymentService,
+            IClientService clientService,
+            ICashRegisterService cashRegisterService)
         {
-            _paymentRepository = paymentRepository;
-            _clientRepository = clientRepository;
-            _cashRegisterRepository = cashRegisterRepository;
+            _paymentService = paymentService;
+            _clientService = clientService;
+            _cashRegisterService = cashRegisterService;
         }
 
-        // 📌 Tüm Ödemeleri Listeleme
+        // 📌 1️⃣ Tüm ödemeleri listeleme
         public async Task<IActionResult> Index()
         {
-            var payments = await _paymentRepository.GetAllPaymentsAsync();
+            var payments = await _paymentService.GetAllPaymentsAsync();
             return View(payments);
         }
 
-        // 📌 Ödeme Detayı Görüntüleme
-        public async Task<IActionResult> Details(int id)
+        // 📌 2️⃣ Müşteri bazlı ödemeleri listeleme
+        public async Task<IActionResult> ClientPayments(int clientId)
         {
-            var payment = await _paymentRepository.GetPaymentByIdAsync(id);
-            if (payment == null)
-                return NotFound();
-
-            return View(payment);
-        }
-        [HttpGet]
-        public async Task<JsonResult> GetPaymentsByClient(int clientId)
-        {
-            var payments = await _paymentRepository.GetPaymentsByClientAsync(clientId);
-            var paymentList = payments.Select(p => new
-            {
-                PaymentId = p.PaymentId,
-                DisplayText = $"{p.Date:dd/MM/yyyy} - {p.Amount} {p.Currency}"
-            });
-
-            return Json(paymentList);
+            var payments = await _paymentService.GetPaymentsByClientIdAsync(clientId);
+            return View("Index", payments);
         }
 
-        // 📌 Yeni Ödeme Ekleme Sayfası
+        // 📌 3️⃣ Yeni ödeme ekleme sayfası
         public async Task<IActionResult> Create()
         {
-            ViewData["ClientId"] = new SelectList(await _clientRepository.GetAllClientsAsync(), "ClientId", "CompanyName");
+            await PopulateDropDowns();
             return View();
         }
 
-        // 📌 Yeni Ödeme Ekleme İşlemi
+        // 📌 4️⃣ Yeni ödeme ekleme işlemi
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Payment payment)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                await _paymentRepository.AddPaymentAsync(payment);
-                return RedirectToAction(nameof(Index));
+                await PopulateDropDowns();
+                return View(payment);
             }
 
-            ViewData["ClientId"] = new SelectList(await _clientRepository.GetAllClientsAsync(), "ClientId", "CompanyName", payment.ClientId);
-            return View(payment);
+            var cashRegister = await _cashRegisterService.GetFirstAsync();
+            if (cashRegister == null)
+            {
+                ModelState.AddModelError("", "Kasa bulunamadı!");
+                await PopulateDropDowns();
+                return View(payment);
+            }
+
+            await _paymentService.ProcessPaymentAsync(payment, cashRegister);
+            return RedirectToAction(nameof(Index));
         }
 
-        // 📌 Ödeme Güncelleme Sayfası
+        // 📌 5️⃣ Ödeme düzenleme sayfası
         public async Task<IActionResult> Edit(int id)
         {
-            var payment = await _paymentRepository.GetPaymentByIdAsync(id);
+            var payment = await _paymentService.GetAllPaymentsAsync();
             if (payment == null)
                 return NotFound();
 
-            ViewData["ClientId"] = new SelectList(await _clientRepository.GetAllClientsAsync(), "ClientId", "CompanyName", payment.ClientId);
-            return View(payment);
+            await PopulateDropDowns();
+            return View(payment.FirstOrDefault());
         }
 
-        // 📌 Ödeme Güncelleme İşlemi
+        // 📌 6️⃣ Ödeme düzenleme işlemi
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Payment payment)
+        public async Task<IActionResult> Edit(Payment payment)
         {
-            if (id != payment.PaymentId)
-                return NotFound();
-
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                await _paymentRepository.UpdatePaymentAsync(payment);
-                return RedirectToAction(nameof(Index));
+                await PopulateDropDowns();
+                return View(payment);
             }
 
-            ViewData["ClientId"] = new SelectList(await _clientRepository.GetAllClientsAsync(), "ClientId", "CompanyName", payment.ClientId);
-            return View(payment);
+            await _paymentService.UpdatePaymentAsync(payment);
+            return RedirectToAction(nameof(Index));
         }
 
-        // 📌 Ödeme Silme Onayı
+        // 📌 7️⃣ Ödeme silme sayfası
         public async Task<IActionResult> Delete(int id)
         {
-            var payment = await _paymentRepository.GetPaymentByIdAsync(id);
+            var payment = await _paymentService.GetAllPaymentsAsync();
             if (payment == null)
                 return NotFound();
 
-            return View(payment);
+            return View(payment.FirstOrDefault());
         }
 
-        // 📌 Ödeme Silme İşlemi
         [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _paymentRepository.DeletePaymentAsync(id);
+            await _paymentService.DeletePaymentAsync(id);
             return RedirectToAction(nameof(Index));
+        }
+
+        // 📌 8️⃣ Form dropdownlarını doldurma metodu
+        private async Task PopulateDropDowns()
+        {
+            var clients = await _clientService.GetAllClientsAsync();
+            ViewBag.Clients = new SelectList(clients, "ClientId", "CompanyName");
         }
     }
 }

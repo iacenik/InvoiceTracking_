@@ -1,14 +1,46 @@
-﻿@model EntityLayer.Entities.Payment
+﻿@using static EntityLayer.Entities.Enums
+@model EntityLayer.Entities.Payment
 
 @{
-    ViewData["Title"] = "Ödeme Güncelle";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "✏ Ödeme Güncelle";
 }
 
-<h2 class="mb-4">@ViewData["Title"]</h2>
+<div class="container mt-4">
+    <h2>✏ Ödeme Güncelle</h2>
 
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="PaymentId" />
+    <form asp-action="Edit">
+        <input type="hidden" asp-for="PaymentId" />
 
-    <partial name="Create" />
-</form>
+        <!-- Müşteri Adı (Değiştirilemez) -->
+        <div class="mb-3">
+            <label class="form-label">Müşteri</label>
+            <input type="text" class="form-control" value="@Model.Client.CompanyName" readonly>
+        </div>
+
+        <!-- Ödeme Tutarı -->
+        <div class="mb-3">
+            <label class="form-label">Tutar</label>
+            <input type="number" asp-for="Amount" class="form-control" step="0.01" required>
+        </div>
+
+        <!-- Para Birimi Seçimi -->
+        <div class="mb-3">
+            <label class="form-label">Para Birimi</label>
+            <select asp-for="Currency" class="form-control">
+                <option value="EUR" selected="@(Model.Currency == CurrencyType.EUR)">💶 EUR</option>
+                <option value="RON" selected="@(Model.Currency == CurrencyType.RON)">🇷🇴 RON</option>
+                <option value="USD" selected="@(Model.Currency == CurrencyType.USD)">💵 USD</option>
+            </select>
+        </div>
+
+        <!-- Ödeme Açıklaması -->
+        <div class="mb-3">
+            <label class="form-label">Açıklama</label>
+            <textarea asp-for="Description" class="form-control">@Model.Description</textarea>
+        </div>
+
+        <!-- Kaydet & İptal Butonları -->
+        <button type="submit" class="btn btn-warning">💾 Güncelle</button>
+        <a asp-action="Index" class="btn btn-secondary">❌ İptal</a>
+    </form>
+</div>

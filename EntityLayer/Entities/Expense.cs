@@ -12,7 +12,7 @@ namespace EntityLayer.Entities
         public int ExpenseId { get; set; }
 
         [Required]
-        public decimal Amount { get; set; } // Tutar
+        public decimal Amount { get; set; } = 0m; // Tutar
 
         [Required]
         public DateTime Date { get; set; } = DateTime.Now; // Giderin tarihi

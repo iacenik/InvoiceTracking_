@@ -1,103 +1,89 @@
-﻿
+﻿using BusinessLayer.Services;
 using EntityLayer.Entities;
 using Microsoft.AspNetCore.Mvc;
-using BusinessLayer.Common;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace InvoiceTracking.Controllers
+namespace InvoiceSystem.Controllers
 {
     public class EmployeeController : Controller
     {
-        private readonly IEmployeeRepository _employeeRepository;
+        private readonly IEmployeeService _employeeService;
 
-        public EmployeeController(IEmployeeRepository employeeRepository)
+        public EmployeeController(IEmployeeService employeeService)
         {
-            _employeeRepository = employeeRepository;
+            _employeeService = employeeService;
         }
 
-        // 📌 Çalışanları Listeleme
+        // 📌 1️⃣ Tüm çalışanları listele
         public async Task<IActionResult> Index()
         {
-            var employees = await _employeeRepository.GetAllEmployeesAsync();
+            var employees = await _employeeService.GetAllEmployeesAsync();
             return View(employees);
         }
 
-        // 📌 Çalışan Detaylarını Görüntüleme
-        public async Task<IActionResult> Details(int id)
-        {
-            var employee = await _employeeRepository.GetEmployeeByIdAsync(id);
-            if (employee == null)
-            {
-                return NotFound();
-            }
-            return View(employee);
-        }
-
-        // 📌 Yeni Çalışan Ekleme (Form Sayfası)
+        // 📌 2️⃣ Yeni çalışan ekleme formu
         public IActionResult Create()
         {
             return View();
         }
 
-        // 📌 Yeni Çalışan Ekleme (Post Metodu)
+        // 📌 3️⃣ Yeni çalışan ekleme işlemi
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Employee employee)
         {
             if (ModelState.IsValid)
             {
-                await _employeeRepository.AddEmployeeAsync(employee);
+                await _employeeService.AddEmployeeAsync(employee);
                 return RedirectToAction(nameof(Index));
             }
             return View(employee);
         }
 
-        // 📌 Çalışan Güncelleme (Form Sayfası)
+        // 📌 4️⃣ Çalışan güncelleme formu
         public async Task<IActionResult> Edit(int id)
         {
-            var employee = await _employeeRepository.GetEmployeeByIdAsync(id);
+            var employee = await _employeeService.GetEmployeeByIdAsync(id);
             if (employee == null)
-            {
                 return NotFound();
-            }
+
             return View(employee);
         }
 
-        // 📌 Çalışan Güncelleme (Post Metodu)
+        // 📌 5️⃣ Çalışan güncelleme işlemi
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Employee employee)
+        public async Task<IActionResult> Edit(Employee employee)
         {
-            if (id != employee.EmployeeId)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
-                await _employeeRepository.UpdateEmployeeAsync(employee);
+                await _employeeService.UpdateEmployeeAsync(employee);
                 return RedirectToAction(nameof(Index));
             }
             return View(employee);
         }
 
-        // 📌 Çalışan Silme Onayı (Form Sayfası)
+        // 📌 6️⃣ Çalışan silme işlemi
         public async Task<IActionResult> Delete(int id)
         {
-            var employee = await _employeeRepository.GetEmployeeByIdAsync(id);
+            var employee = await _employeeService.GetEmployeeByIdAsync(id);
             if (employee == null)
-            {
                 return NotFound();
-            }
+
             return View(employee);
         }
 
-        // 📌 Çalışan Silme (Post Metodu)
         [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _employeeRepository.DeleteEmployeeAsync(id);
+            await _employeeService.DeleteEmployeeAsync(id);
             return RedirectToAction(nameof(Index));
+        }
+
+        // 📌 7️⃣ Çalışanın yaptığı giderleri listeleme
+        public async Task<IActionResult> Expenses(int employeeId)
+        {
+            var expenses = await _employeeService.GetEmployeeExpensesAsync(employeeId);
+            return View(expenses);
         }
     }
 }

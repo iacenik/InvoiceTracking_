@@ -1,102 +1,96 @@
-﻿using BusinessLayer.Common;
+﻿using BusinessLayer.Services;
 using EntityLayer.Entities;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace InvoiceTracking.Controllers
+namespace InvoiceSystem.Controllers
 {
     public class ClientController : Controller
     {
-        private readonly IClientRepository _clientRepository;
-        public ClientController(IClientRepository clientRepository)
+        private readonly IClientService _clientService;
+
+        public ClientController(IClientService clientService)
         {
-            _clientRepository = clientRepository;
+            _clientService = clientService;
         }
 
-
-        // ✅ Tüm müşterileri listeleme
+        // 📌 1️⃣ Tüm müşterileri listele
         public async Task<IActionResult> Index()
         {
-            var clients = await _clientRepository.GetAllClientsAsync();
+            var clients = await _clientService.GetAllClientsAsync();
             return View(clients);
         }
 
-        // ✅ Müşteri detaylarını görüntüleme
-        public async Task<IActionResult> Details(int id)
-        {
-            var client = await _clientRepository.GetClientByIdAsync(id);
-            if (client == null)
-                return NotFound();
-            return View(client);
-        }
-
-        // ✅ Yeni müşteri ekleme formu
+        // 📌 2️⃣ Yeni müşteri ekleme formu
         public IActionResult Create()
         {
             return View();
         }
 
-        // ✅ Yeni müşteri ekleme işlemi
+        // 📌 3️⃣ Yeni müşteri ekleme işlemi
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Client client)
         {
             if (ModelState.IsValid)
             {
-                client.CreatedAt = DateTime.Now; // 📌 Oluşturma tarihini elle ata
-                await _clientRepository.AddClientAsync(client);
+                await _clientService.AddClientAsync(client);
                 return RedirectToAction(nameof(Index));
             }
             return View(client);
         }
 
-        // ✅ Müşteri güncelleme formu
+        // 📌 4️⃣ Müşteri güncelleme formu
         public async Task<IActionResult> Edit(int id)
         {
-            var client = await _clientRepository.GetClientByIdAsync(id);
+            var client = await _clientService.GetClientByIdAsync(id);
             if (client == null)
                 return NotFound();
+
             return View(client);
         }
 
-        // ✅ Müşteri güncelleme işlemi
+        // 📌 5️⃣ Müşteri güncelleme işlemi
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Client client)
+        public async Task<IActionResult> Edit(Client client)
         {
-            if (id != client.ClientId)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
-                var existingClient = await _clientRepository.GetClientByIdAsync(id);
-                if (existingClient != null)
-                {
-                    client.CreatedAt = existingClient.CreatedAt; // 📌 Eski oluşturma tarihini koru
-                    await _clientRepository.UpdateClientAsync(client);
-                    return RedirectToAction(nameof(Index));
-                }
+                await _clientService.UpdateClientAsync(client);
+                return RedirectToAction(nameof(Index));
             }
             return View(client);
         }
 
-        // ✅ Müşteri silme onay ekranı
+        // 📌 6️⃣ Müşteri silme işlemi
         public async Task<IActionResult> Delete(int id)
         {
-            var client = await _clientRepository.GetClientByIdAsync(id);
+            var client = await _clientService.GetClientByIdAsync(id);
             if (client == null)
                 return NotFound();
+
             return View(client);
         }
 
-        // ✅ Müşteri silme işlemi
         [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _clientRepository.DeleteClientAsync(id);
+            await _clientService.DeleteClientAsync(id);
             return RedirectToAction(nameof(Index));
+        }
+
+        // 📌 7️⃣ Müşteri faturalarını görüntüle
+        public async Task<IActionResult> Invoices(int clientId)
+        {
+            var invoices = await _clientService.GetClientInvoicesAsync(clientId);
+            return View(invoices);
+        }
+
+        // 📌 8️⃣ Müşteri ödemelerini görüntüle
+        public async Task<IActionResult> Payments(int clientId)
+        {
+            var payments = await _clientService.GetClientPaymentsAsync(clientId);
+            return View(payments);
         }
     }
 }

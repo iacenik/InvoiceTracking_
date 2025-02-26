@@ -1,0 +1,25 @@
+﻿@model EntityLayer.Entities.Employee
+
+@{
+    ViewData["Title"] = "Çalışan Sil";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="text-danger text-center">Çalışan Sil</h2>
+
+    <p class="text-center">Bu çalışanı silmek istediğinize emin misiniz?</p>
+
+    <h4 class="text-center"><strong>@Model.EmployeeName @Model.EmployeeSurname</strong></h4>
+
+    <form asp-action="DeleteConfirmed" method="post">
+        <input type="hidden" asp-for="EmployeeId" />
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-danger">Sil</button>
+            <a asp-action="Index" class="btn btn-secondary">İptal</a>
+        </div>
+    </form>
+</div>
+
+

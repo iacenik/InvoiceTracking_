@@ -1,112 +1,121 @@
-﻿using BusinessLayer.Common;
-using DataAccessLayer.Repository;
+﻿using BusinessLayer.Services;
 using EntityLayer.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Text.Json;
-using static EntityLayer.Entities.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BusinessLayer.Common;
 
-namespace InvoiceTracking.Controllers
+namespace InvoiceSystem.Controllers
 {
     public class PaymentDetailController : Controller
     {
-        private readonly IPaymentDetailRepository _paymentDetailRepository;
-        private readonly IPaymentRepository _paymentRepository;
-        private readonly IClientRepository _clientRepository;
+        private readonly IPaymentDetailService _paymentDetailService;
+        private readonly IPaymentService _paymentService;
 
-        public PaymentDetailController(IPaymentDetailRepository paymentDetailRepository, IPaymentRepository paymentRepository, IClientRepository clientRepository)
+        public PaymentDetailController(IPaymentDetailService paymentDetailService, IPaymentService paymentService)
         {
-            _paymentDetailRepository = paymentDetailRepository;
-            _paymentRepository = paymentRepository;
-            _clientRepository = clientRepository;
+            _paymentDetailService = paymentDetailService;
+            _paymentService = paymentService;
         }
 
+        // 📌 1️⃣ Tüm ödeme detaylarını listeleme
         public async Task<IActionResult> Index()
         {
-            var paymentDetails = await _paymentDetailRepository.GetAllPaymentDetailsAsync();
+            var paymentDetails = await _paymentDetailService.GetAllPaymentDetailsAsync();
             return View(paymentDetails);
         }
 
+        // 📌 2️⃣ Belirli bir ödeme için detayları listeleme
+        public async Task<IActionResult> PaymentDetailsByPaymentId(int paymentId)
+        {
+            var details = await _paymentDetailService.GetDetailsByPaymentIdAsync(paymentId);
+            return View("Index", details);
+        }
+
+        // 📌 3️⃣ Yeni ödeme detayı ekleme sayfası
         public async Task<IActionResult> Create()
         {
-            ViewData["Clients"] = new SelectList(await _clientRepository.GetAllClientsAsync(), "ClientId", "CompanyName");
-            ViewData["PaymentId"] = new SelectList(new List<SelectListItem>(), "Value", "Text");
+            await PopulateDropDowns();
             return View();
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(PaymentDetail paymentDetail)
+        // 📌 4️⃣ Yeni ödeme detayı ekleme işlemi
+        [HttpGet]
+        public async Task<IActionResult> Create(PaymentDetail paymentDetail, string productName, decimal unitPrice, int quantity)
         {
-            if (!string.IsNullOrEmpty(paymentDetail.SoldProducts))
+            if (!ModelState.IsValid)
             {
-                if (!TryDeserializeSoldProducts(paymentDetail.SoldProducts, out var products))
-                {
-                    ModelState.AddModelError("SoldProducts", "Ürün listesi geçersiz.");
-                }
-                else if (!products.Any())
-                {
-                    ModelState.AddModelError("SoldProducts", "Ürün listesi boş olamaz.");
-                }
-                else
-                {
-                    paymentDetail.CalculateTotalAmount();
-                }
+                await PopulateDropDowns();
+                return View(paymentDetail);
             }
 
-            if (ModelState.IsValid)
+            var newProduct = new SoldProduct
             {
-                await _paymentDetailRepository.AddPaymentDetailAsync(paymentDetail);
-                await UpdatePaymentAmount(paymentDetail.PaymentId);
-                return RedirectToAction(nameof(Index));
-            }
+                ProductName = productName,
+                UnitPrice = unitPrice,
+                Quantity = quantity,
+                // ❌ TotalPrice'a dışarıdan değer atamıyoruz! 
+                // ✅ Hesaplama direkt get bloğundan gelecek.
+            };
 
-            await PopulateDropdowns(paymentDetail.PaymentId);
+            var productList = paymentDetail.SoldProductsList;
+            productList.Add(newProduct);
+
+            paymentDetail.SetSoldProducts(productList);
+
+            await _paymentDetailService.AddPaymentDetailAsync(paymentDetail);
+            return RedirectToAction(nameof(Index));
+        }
+        // 📌 5️⃣ Ödeme detayı düzenleme sayfası
+        public async Task<IActionResult> Edit(int id)
+        {
+            var paymentDetail = await _paymentDetailService.GetDetailByIdAsync(id);
+            if (paymentDetail == null)
+                return NotFound();
+
+            await PopulateDropDowns();
             return View(paymentDetail);
         }
 
-        private async Task UpdatePaymentAmount(int paymentId)
+        // 📌 6️⃣ Ödeme detayı düzenleme işlemi
+        [HttpPost]
+        public async Task<IActionResult> Edit(PaymentDetail paymentDetail)
         {
-            var relatedPayment = await _paymentRepository.GetPaymentByIdAsync(paymentId);
-            if (relatedPayment != null)
+            if (!ModelState.IsValid)
             {
-                relatedPayment.CalculateAmount();
-                await _paymentRepository.UpdatePaymentAsync(relatedPayment);
+                await PopulateDropDowns();
+                return View(paymentDetail);
             }
+
+            await _paymentDetailService.UpdatePaymentDetailAsync(paymentDetail);
+            return RedirectToAction(nameof(Index));
         }
 
-        private bool TryDeserializeSoldProducts(string json, out List<SoldProduct> products)
+        // 📌 7️⃣ Ödeme detayı silme sayfası
+        public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                products = JsonSerializer.Deserialize<List<SoldProduct>>(json) ?? new List<SoldProduct>();
-                return true;
-            }
-            catch (JsonException)
-            {
-                products = new List<SoldProduct>();
-                return false;
-            }
+            var paymentDetail = await _paymentDetailService.GetDetailByIdAsync(id);
+            if (paymentDetail == null)
+                return NotFound();
+
+            return View(paymentDetail);
         }
 
-        private async Task PopulateDropdowns(int? selectedPaymentId = null)
+        [HttpPost, ActionName("Delete")]
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var payments = await _paymentRepository.GetAllPaymentsAsync();
-            ViewData["PaymentId"] = new SelectList(
-                payments.Select(p => new
-                {
-                    p.PaymentId,
-                    DisplayText = $"{p.Client?.CompanyName} - {p.Date:dd/MM/yyyy} - {p.Amount} {p.Currency}"
-                }),
-                "PaymentId",
-                "DisplayText",
-                selectedPaymentId
-            );
+            await _paymentDetailService.DeletePaymentDetailAsync(id);
+            return RedirectToAction(nameof(Index));
+        }
 
-            ViewData["CurrencyTypes"] = Enum.GetValues(typeof(CurrencyType))
-                .Cast<CurrencyType>()
-                .Select(ct => new SelectListItem { Value = ct.ToString(), Text = ct.ToString() })
-                .ToList();
+        // 📌 8️⃣ Form dropdownlarını doldurma metodu
+        private async Task PopulateDropDowns()
+        {
+            var payments = await _paymentService.GetAllPaymentsAsync();
+            ViewBag.Payments = new SelectList(payments, "PaymentId", "Description");
         }
     }
 }

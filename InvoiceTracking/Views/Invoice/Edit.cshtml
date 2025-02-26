@@ -1,30 +1,20 @@
 ﻿@model EntityLayer.Entities.Invoice
 
-@{
-    ViewData["Title"] = "Fatura Düzenle";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
-
-<h2>@ViewData["Title"]</h2>
+<h2>Edit Invoice</h2>
 
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="InvoiceId" />
-
-    <div class="mb-3">
-        <label class="form-label">Tarih</label>
-        <input asp-for="Date" type="date" class="form-control" />
+    <div class="form-group">
+        <label for="ClientId">Client</label>
+        <select asp-for="ClientId" asp-items="ViewBag.Clients" class="form-control"></select>
     </div>
-
-    <div class="mb-3">
-        <label class="form-label">Para Birimi</label>
-        <select asp-for="Currency" class="form-select">
-            <option value="RON">RON</option>
-            <option value="EUR">EUR</option>
-            <option value="USD">USD</option>
-            <option value="TL">TL</option>
-        </select>
+    <div class="form-group">
+        <label for="Date">Date</label>
+        <input asp-for="Date" class="form-control" type="date" />
     </div>
-
-    <button type="submit" class="btn btn-success">Güncelle</button>
-    <a asp-action="Index" class="btn btn-secondary">İptal</a>
+    <div class="form-group">
+        <label for="TotalAmount">Total Amount</label>
+        <input asp-for="TotalAmount" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Update</button>
 </form>

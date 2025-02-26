@@ -1,42 +1,80 @@
-﻿@model IEnumerable<EntityLayer.Entities.InvoiceDetail>
+﻿@model List<EntityLayer.Entities.InvoiceDetail>
 
 @{
     ViewData["Title"] = "Fatura Detayları";
-    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="mb-4">📜 Fatura Detayları</h2>
+        <a asp-action="Create" class="btn btn-primary">➕ Yeni Fatura Detayı</a>
+    </div>
 
-<a asp-action="Create" class="btn btn-primary mb-3">+ Yeni Fatura Detayı Ekle</a>
-
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Fatura ID</th>
-            <th>Ürün</th>
-            <th>Miktar</th>
-            <th>Birim Fiyat</th>
-            <th>Toplam Fiyat</th>
-            <th>Para Birimi</th>
-            <th>İşlemler</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var detail in Model)
-        {
+    <table id="invoiceDetailTable" class="table table-striped table-hover">
+        <thead class="table-dark">
             <tr>
-                <td>@detail.InvoiceId</td>
-                <td>@detail.Item?.ItemName</td>
-                <td>@detail.Quantity</td>
-                <td>@detail.UnitPrice.ToString("N2")</td>
-                <td>@detail.TotalPrice.ToString("N2")</td>
-                <td>@detail.Currency</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@detail.InvoiceDetailId" class="btn btn-info btn-sm">Detay</a>
-                    <a asp-action="Edit" asp-route-id="@detail.InvoiceDetailId" class="btn btn-warning btn-sm">Düzenle</a>
-                    <a asp-action="Delete" asp-route-id="@detail.InvoiceDetailId" class="btn btn-danger btn-sm">Sil</a>
-                </td>
+                <th>#</th>
+                <th>Fatura ID</th>
+                <th>Ürünler</th>
+                <th>Toplam Tutar</th>
+                <th>Para Birimi</th>
+                <th>İşlemler</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var detail in Model)
+            {
+                <tr>
+                    <td>@detail.InvoiceDetailId</td>
+                    <td>@detail.InvoiceId</td>
+                    <td>
+                        <ul>
+                            @foreach (var product in detail.SoldProductsList)
+                            {
+                                <li>@product.ProductName (@product.Quantity x @product.UnitPrice.ToString("N2"))</li>
+                            }
+                        </ul>
+                    </td>
+                    <td>@detail.TotalPrice.ToString("N2")</td>
+                    <td>
+                        @if (detail.Currency == EntityLayer.Entities.Enums.CurrencyType.EUR)
+                        {
+                            <span class="badge bg-info">💶 EUR</span>
+                        }
+                        else if (detail.Currency == EntityLayer.Entities.Enums.CurrencyType.RON)
+                        {
+                            <span class="badge bg-warning">🇷🇴 RON</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-primary">💵 USD</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@detail.InvoiceDetailId" class="btn btn-sm btn-outline-warning">✏ Düzenle</a>
+                        <a asp-action="Delete" asp-route-id="@detail.InvoiceDetailId" class="btn btn-sm btn-outline-danger">🗑 Sil</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#invoiceDetailTable').DataTable({
+                "paging": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "language": {
+                    "search": "Ara:",
+                    "lengthMenu": "Sayfa başına _MENU_ kayıt göster",
+                    "info": "_TOTAL_ kayıt içinden _START_ - _END_ gösteriliyor",
+                    "paginate": { "previous": "Önceki", "next": "Sonraki" }
+                }
+            });
+        });
+    </script>
+}

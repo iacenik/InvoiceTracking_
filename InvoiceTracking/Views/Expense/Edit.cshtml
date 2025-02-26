@@ -1,14 +1,33 @@
-﻿@model EntityLayer.Entities.Expense
+﻿@using static EntityLayer.Entities.Enums
+@model EntityLayer.Entities.Expense
 
 @{
-    ViewData["Title"] = "Gider Düzenle";
+    ViewData["Title"] = "Gider Güncelle";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2 class="mb-4">@ViewData["Title"]</h2>
+<h2 class="text-center my-4">Gider Güncelle</h2>
 
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="ExpenseId" />
+<div class="card shadow p-4">
+    <form asp-action="Edit">
+        <input type="hidden" asp-for="ExpenseId" />
 
-    <partial name="Create" />
-</form>
+        <div class="row">
+            <div class="col-md-6">
+                <label class="form-label">Tutar</label>
+                <input asp-for="Amount" class="form-control" />
+                <span asp-validation-for="Amount" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Para Birimi</label>
+                <select asp-for="Currency" asp-items="Html.GetEnumSelectList<CurrencyType>()" class="form-select"></select>
+                <span asp-validation-for="Currency" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mt-4 text-center">
+            <button type="submit" class="btn btn-warning">Güncelle</button>
+            <a asp-action="Index" class="btn btn-secondary">İptal</a>
+        </div>
+    </form>
+</div>

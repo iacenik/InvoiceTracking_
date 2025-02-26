@@ -1,28 +1,23 @@
 ﻿@model EntityLayer.Entities.ExpenseCategory
 
 @{
-    ViewData["Title"] = "Gider Kategorisini Sil";
+    ViewData["Title"] = "Gider Kategorisi Sil";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="container mt-4">
+    <h2 class="text-danger text-center">Gider Kategorisi Sil</h2>
 
-<p>Bu kategoriyi silmek istediğinizden emin misiniz?</p>
+    <p class="text-center">Bu kategoriyi silmek istediğinize emin misiniz?</p>
 
-<div>
-    <p><strong>Kategori Adı:</strong> @Model.CategoryName</p>
-    <p><strong>Açıklama:</strong> @Model.Description</p>
-</div>
+    <h4 class="text-center"><strong>@Model.CategoryName</strong></h4>
 
-@if (Model.Expenses.Any())
-{
-    <p class="text-danger">⚠️ Bu kategoriye ait giderler var! Önce giderleri silmelisiniz.</p>
-}
-else
-{
     <form asp-action="DeleteConfirmed" method="post">
         <input type="hidden" asp-for="CategoryId" />
-        <button type="submit" class="btn btn-danger">Sil</button>
-        <a asp-action="Index" class="btn btn-secondary">İptal</a>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-danger">Sil</button>
+            <a asp-action="Index" class="btn btn-secondary">İptal</a>
+        </div>
     </form>
-}
+</div>

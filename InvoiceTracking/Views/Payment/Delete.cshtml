@@ -1,22 +1,28 @@
 ﻿@model EntityLayer.Entities.Payment
 
 @{
-    ViewData["Title"] = "Ödeme Sil";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "🗑 Ödeme Sil";
 }
 
-<h2 class="mb-4">@ViewData["Title"]</h2>
+<div class="container mt-4">
+    <h2>🗑 Ödeme Sil</h2>
 
-<p>Bu ödemeyi silmek istediğinize emin misiniz?</p>
+    <p>Bu ödemeyi silmek istediğinizden emin misiniz?</p>
 
-<table class="table">
-    <tr><th>Müşteri</th><td>@Model.Client?.CompanyName</td></tr>
-    <tr><th>Tarih</th><td>@Model.Date.ToString("dd/MM/yyyy")</td></tr>
-    <tr><th>Tutar</th><td>@Model.Amount.ToString("N2")</td></tr>
-</table>
+    <dl class="row">
+        <dt class="col-sm-3">Müşteri:</dt>
+        <dd class="col-sm-9">@Model.Client.CompanyName</dd>
 
-<form asp-action="DeleteConfirmed" method="post">
-    <input type="hidden" asp-for="PaymentId" />
-    <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Sil</button>
-    <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Geri</a>
-</form>
+        <dt class="col-sm-3">Tutar:</dt>
+        <dd class="col-sm-9">@Model.Amount.ToString("N2")</dd>
+
+        <dt class="col-sm-3">Para Birimi:</dt>
+        <dd class="col-sm-9">@Model.Currency</dd>
+    </dl>
+
+    <form asp-action="DeleteConfirmed">
+        <input type="hidden" asp-for="PaymentId" />
+        <button type="submit" class="btn btn-danger">🗑 Sil</button>
+        <a asp-action="Index" class="btn btn-secondary">❌ İptal</a>
+    </form>
+</div>

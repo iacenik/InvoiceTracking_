@@ -5,27 +5,63 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2 class="mb-4">@ViewData["Title"]</h2>
+<div class="container mt-4">
+    <h2 class="text-center"><i class="fas fa-money-bill-wave"></i> Yeni Ödeme Ekle</h2>
 
-<form asp-action="Create" method="post">
-    <div class="mb-3">
-        <label asp-for="ClientId" class="form-label">Müşteri</label>
-        <select asp-for="ClientId" class="form-select" asp-items="ViewBag.ClientId">
-            <option value="">Müşteri Seçin</option>
-        </select>
-        <span asp-validation-for="ClientId" class="text-danger"></span>
+    <div class="card shadow-lg mt-4">
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+
+                <!-- Müşteri Seçimi -->
+                <div class="mb-3">
+                    <label class="form-label"><i class="fas fa-user"></i> Müşteri</label>
+                    <select asp-for="ClientId" class="form-select" asp-items="ViewBag.Clients">
+                        <option value="">Müşteri Seçin</option>
+                    </select>
+                    <span asp-validation-for="ClientId" class="text-danger"></span>
+                </div>
+
+                <!-- Ödeme Miktarı -->
+                <div class="mb-3">
+                    <label class="form-label"><i class="fas fa-coins"></i> Miktar</label>
+                    <input asp-for="Amount" type="number" class="form-control" placeholder="Ödeme Tutarı" required />
+                    <span asp-validation-for="Amount" class="text-danger"></span>
+                </div>
+
+                <!-- Para Birimi Seçimi -->
+                <div class="mb-3">
+                    <label class="form-label"><i class="fas fa-euro-sign"></i> Para Birimi</label>
+                    <select asp-for="Currency" class="form-select">
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="RON">RON - Romanya Leyi</option>
+                        <option value="USD">USD - Amerikan Doları</option>
+                    </select>
+                    <span asp-validation-for="Currency" class="text-danger"></span>
+                </div>
+
+                <!-- Açıklama -->
+                <div class="mb-3">
+                    <label class="form-label"><i class="fas fa-comment-dots"></i> Açıklama</label>
+                    <textarea asp-for="Description" class="form-control" rows="3" placeholder="Açıklama ekleyin (opsiyonel)"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <!-- Butonlar -->
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> Ödeme Kaydet
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Geri Dön
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
+</div>
 
-    <div class="mb-3">
-        <label asp-for="Date" class="form-label">Tarih</label>
-        <input asp-for="Date" type="date" class="form-control" />
-        <span asp-validation-for="Date" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">
-        <i class="fas fa-save"></i> Kaydet
-    </button>
-    <a asp-action="Index" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Geri
-    </a>
-</form>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

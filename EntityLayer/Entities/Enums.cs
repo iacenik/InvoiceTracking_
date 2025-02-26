@@ -12,8 +12,7 @@ namespace EntityLayer.Entities
         {
             RON,
             EUR,
-            TR,
-            DOLAR
+            USD
         }
         public enum InvoiceType
         {

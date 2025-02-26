@@ -1,20 +1,28 @@
 ﻿@model EntityLayer.Entities.InvoiceDetail
 
 @{
-    ViewData["Title"] = "Fatura Detayı";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Fatura Detayını Sil";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="container mt-4">
+    <h2>🗑 Fatura Detayını Sil</h2>
 
-<div>
-    <p><strong>Fatura ID:</strong> @Model.InvoiceId</p>
-    <p><strong>Ürün:</strong> @Model.Item?.ItemName</p>
-    <p><strong>Miktar:</strong> @Model.Quantity</p>
-    <p><strong>Birim Fiyat:</strong> @Model.UnitPrice.ToString("N2")</p>
-    <p><strong>Toplam Fiyat:</strong> @Model.TotalPrice.ToString("N2")</p>
-    <p><strong>Para Birimi:</strong> @Model.Currency</p>
+    <p>Bu detayı silmek istediğinizden emin misiniz?</p>
+
+    <dl class="row">
+        <dt class="col-sm-3">Fatura ID:</dt>
+        <dd class="col-sm-9">@Model.InvoiceId</dd>
+
+        <dt class="col-sm-3">Toplam Tutar:</dt>
+        <dd class="col-sm-9">@Model.TotalPrice.ToString("N2")</dd>
+
+        <dt class="col-sm-3">Para Birimi:</dt>
+        <dd class="col-sm-9">@Model.Currency</dd>
+    </dl>
+
+    <form asp-action="DeleteConfirmed">
+        <input type="hidden" asp-for="InvoiceDetailId" />
+        <button type="submit" class="btn btn-danger">🗑 Sil</button>
+        <a asp-action="InvoiceDetails" asp-route-invoiceId="@Model.InvoiceId" class="btn btn-secondary">❌ İptal</a>
+    </form>
 </div>
-
-<a asp-action="Edit" asp-route-id="@Model.InvoiceDetailId" class="btn btn-warning">Düzenle</a>
-<a asp-action="Index" class="btn btn-secondary">Geri</a>

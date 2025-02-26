@@ -1,57 +1,91 @@
-﻿@model IEnumerable<EntityLayer.Entities.Invoice>
+﻿@model List<EntityLayer.Entities.Invoice>
 
 @{
-    ViewData["Title"] = "Faturalar Listesi";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Fatura Listesi";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="mb-4">📄 Fatura Listesi</h2>
+        <a asp-action="Create" class="btn btn-primary">➕ Yeni Fatura</a>
+    </div>
 
-<a asp-action="Create" class="btn btn-primary mb-3">+ Yeni Fatura Ekle</a>
-
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Tarih</th>
-            <th>Müşteri</th>
-            <th>Çalışan</th>
-            <th>Kategori</th>
-            <th>Tutar</th>
-            <th>Para Birimi</th>
-            <th>Ödeme Durumu</th>
-            <th>İşlemler</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var invoice in Model)
-        {
+    <table id="invoiceTable" class="table table-striped table-hover">
+        <thead class="table-dark">
             <tr>
-                <td>@invoice.Date.ToString("dd/MM/yyyy")</td>
-                <td>@invoice.Client?.CompanyName</td>
-                <td>@invoice.Employee?.EmployeeName</td>
-                <td>@invoice.Category?.CategoryName</td>
-                <td>@invoice.TotalAmount.ToString("N2")</td>
-                <td>@invoice.Currency</td>
-                <td>
-                    @if (invoice.IsPaid)
-                    {
-                        <span class="badge bg-success">Ödendi</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-danger">Ödenmedi</span>
-                    }
-                </td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@invoice.InvoiceId" class="btn btn-info btn-sm">Detay</a>
-                    <a asp-action="Edit" asp-route-id="@invoice.InvoiceId" class="btn btn-warning btn-sm">Düzenle</a>
-                    <a asp-action="Delete" asp-route-id="@invoice.InvoiceId" class="btn btn-danger btn-sm">Sil</a>
-                    @if (!invoice.IsPaid)
-                    {
-                        <a asp-action="MarkAsPaid" asp-route-id="@invoice.InvoiceId" class="btn btn-success btn-sm">Ödendi</a>
-                    }
-                </td>
+                <th>#</th>
+                <th>Müşteri</th>
+                <th>Toplam Tutar</th>
+                <th>Para Birimi</th>
+                <th>Fatura Tipi</th>
+                <th>Ödeme Durumu</th>
+                <th>Tarih</th>
+                <th>İşlemler</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var invoice in Model)
+            {
+                <tr>
+                    <td>@invoice.InvoiceId</td>
+                    <td>@invoice.Client?.CompanyName</td>
+                    <td>@invoice.TotalAmount.ToString("N2")</td>
+                    <td>
+                        @if (invoice.Currency == EntityLayer.Entities.Enums.CurrencyType.EUR)
+                        {
+                            <span class="badge bg-info">💶 EUR</span>
+                        }
+                        else if (invoice.Currency == EntityLayer.Entities.Enums.CurrencyType.RON)
+                        {
+                            <span class="badge bg-warning">🇷🇴 RON</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-primary">💵 USD</span>
+                        }
+                    </td>
+                    <td>@invoice.InvoiceType</td>
+                    <td>
+                        @if (invoice.IsPaid)
+                        {
+                            <span class="badge bg-success">✅ Ödendi</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">❌ Ödenmedi</span>
+                        }
+                    </td>
+                    <td>@invoice.Date.ToString("dd/MM/yyyy")</td>
+                    <td>
+                        <a asp-action="InvoiceDetails" asp-route-invoiceId="@invoice.InvoiceId" class="btn btn-sm btn-outline-primary">🔍 Detay</a>
+                        @if (!invoice.IsPaid)
+                        {
+                            <a asp-action="ApproveInvoice" asp-route-invoiceId="@invoice.InvoiceId" class="btn btn-sm btn-outline-success">✔ Onayla</a>
+                        }
+                        <a asp-action="Edit" asp-route-id="@invoice.InvoiceId" class="btn btn-sm btn-outline-warning">✏ Düzenle</a>
+                        <a asp-action="Delete" asp-route-id="@invoice.InvoiceId" class="btn btn-sm btn-outline-danger">🗑 Sil</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#invoiceTable').DataTable({
+                "paging": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "language": {
+                    "search": "Ara:",
+                    "lengthMenu": "Sayfa başına _MENU_ kayıt göster",
+                    "info": "_TOTAL_ kayıt içinden _START_ - _END_ gösteriliyor",
+                    "paginate": { "previous": "Önceki", "next": "Sonraki" }
+                }
+            });
+        });
+    </script>
+}

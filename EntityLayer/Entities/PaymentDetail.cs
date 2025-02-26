@@ -1,10 +1,11 @@
-﻿using System;
+﻿    using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text.Json;
 using static EntityLayer.Entities.Enums;
+using EntityLayer.Entities; // 🔹 SoldProduct buradan geliyor!
 
 namespace EntityLayer.Entities
 {
@@ -17,31 +18,37 @@ namespace EntityLayer.Entities
         [Required]
         public int PaymentId { get; set; }
         [ForeignKey("PaymentId")]
-        public virtual Payment? Payment { get; set; } 
+        public virtual Payment? Payment { get; set; }
 
-        public string SoldProducts { get; set; } = "[]"; 
+        public string SoldProducts { get; set; } = "[]"; // 📌 JSON olarak saklanan ürünler
+
         [Required]
-        public CurrencyType Currency { get; set; } 
+        public CurrencyType Currency { get; set; } = CurrencyType.EUR;
 
-     
         [NotMapped]
-        public decimal TotalAmount { get; private set; }
+        public decimal TotalAmount { get; private set; } = 0m;
+
+        [NotMapped]
+        public List<SoldProduct> SoldProductsList => string.IsNullOrWhiteSpace(SoldProducts)
+            ? new List<SoldProduct>()
+            : JsonSerializer.Deserialize<List<SoldProduct>>(SoldProducts) ?? new List<SoldProduct>();
 
         public void CalculateTotalAmount()
         {
-            var products = JsonSerializer.Deserialize<List<SoldProduct>>(SoldProducts) ?? new List<SoldProduct>();
-            TotalAmount = products.Sum(p => p.TotalPrice); 
+            try
+            {
+                TotalAmount = SoldProductsList.Sum(p => p.TotalPrice);
+            }
+            catch (JsonException)
+            {
+                TotalAmount = 0;
+            }
         }
-    }
 
-    public class SoldProduct
-    {
-        public int ProductId { get; set; } 
-        public string ProductName { get; set; } = string.Empty; 
-        public decimal UnitPrice { get; set; } 
-        public int Quantity { get; set; }
-        public decimal TotalPrice => UnitPrice * Quantity; 
-
-        public CurrencyType Currency { get; set; }
+        public void SetSoldProducts(List<SoldProduct> products)
+        {
+            SoldProducts = JsonSerializer.Serialize(products);
+            CalculateTotalAmount();
+        }
     }
 }

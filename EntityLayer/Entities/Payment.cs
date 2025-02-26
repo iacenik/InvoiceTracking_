@@ -30,7 +30,7 @@ namespace EntityLayer.Entities
 
         // 🔍 `Amount` otomatik hesaplanıyor (PaymentDetail toplamı)
         [NotMapped]
-        public decimal Amount { get; private set; } // 🔍 private set ekledik!
+        public decimal Amount { get; private set; } = 0m;// 🔍 private set ekledik!
 
         public void CalculateAmount() // 🔍 Setter olmadığı için hesaplamayı burada yapıyoruz
         {

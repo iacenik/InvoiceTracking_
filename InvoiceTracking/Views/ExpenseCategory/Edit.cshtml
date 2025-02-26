@@ -1,26 +1,27 @@
 ﻿@model EntityLayer.Entities.ExpenseCategory
 
 @{
-    ViewData["Title"] = "Gider Kategorisini Düzenle";
+    ViewData["Title"] = "Gider Kategorisi Güncelle";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="container mt-4">
+    <h2 class="text-center">Gider Kategorisi Güncelle</h2>
 
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="CategoryId" />
+    <form asp-action="Edit" method="post" class="shadow p-4 bg-light rounded">
+        <input type="hidden" asp-for="CategoryId" />
 
-    <div class="mb-3">
-        <label class="form-label">Kategori Adı</label>
-        <input asp-for="CategoryName" class="form-control" />
-        <span asp-validation-for="CategoryName" class="text-danger"></span>
-    </div>
+        <div class="mb-3">
+            <label class="form-label">Kategori Adı</label>
+            <input asp-for="CategoryName" class="form-control" required />
+        </div>
 
-    <div class="mb-3">
-        <label class="form-label">Açıklama</label>
-        <textarea asp-for="Description" class="form-control"></textarea>
-    </div>
+        <div class="mb-3">
+            <label class="form-label">Açıklama</label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+        </div>
 
-    <button type="submit" class="btn btn-success">Güncelle</button>
-    <a asp-action="Index" class="btn btn-secondary">İptal</a>
-</form>
+        <button type="submit" class="btn btn-primary">Güncelle</button>
+        <a asp-action="Index" class="btn btn-secondary">İptal</a>
+    </form>
+</div>

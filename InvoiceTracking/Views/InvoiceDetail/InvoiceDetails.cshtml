@@ -1,0 +1,67 @@
+﻿@model List<EntityLayer.Entities.InvoiceDetail>
+
+@{
+    ViewData["Title"] = "Fatura Detayları";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">📜 Fatura #@ViewBag.InvoiceId Detayları</h2>
+
+    <a asp-action="Create" asp-route-invoiceId="@ViewBag.InvoiceId" class="btn btn-primary mb-3">➕ Yeni Ürün Ekle</a>
+    <a asp-action="Index" class="btn btn-secondary mb-3">🔙 Geri</a>
+
+    <table id="invoiceDetailTable" class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Ürünler</th>
+                <th>Toplam Tutar</th>
+                <th>Para Birimi</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var detail in Model)
+            {
+                <tr>
+                    <td>@detail.InvoiceDetailId</td>
+                    <td>
+                        <ul>
+                            @foreach (var product in detail.SoldProductsList)
+                            {
+                                <li>@product.ProductName (@product.Quantity x @product.UnitPrice.ToString("N2"))</li>
+                            }
+                        </ul>
+                    </td>
+                    <td>@detail.TotalPrice.ToString("N2")</td>
+                    <td>
+                        @if (detail.Currency == EntityLayer.Entities.Enums.CurrencyType.EUR)
+                        {
+                            <span class="badge bg-info">💶 EUR</span>
+                        }
+                        else if (detail.Currency == EntityLayer.Entities.Enums.CurrencyType.RON)
+                        {
+                            <span class="badge bg-warning">🇷🇴 RON</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-primary">💵 USD</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@detail.InvoiceDetailId" class="btn btn-sm btn-outline-warning">✏ Düzenle</a>
+                        <a asp-action="Delete" asp-route-id="@detail.InvoiceDetailId" class="btn btn-sm btn-outline-danger">🗑 Sil</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#invoiceDetailTable').DataTable();
+        });
+    </script>
+}

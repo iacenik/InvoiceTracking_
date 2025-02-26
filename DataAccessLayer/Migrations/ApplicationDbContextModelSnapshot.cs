@@ -91,7 +91,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasKey("ClientId");
 
-                    b.ToTable("Clıents");
+                    b.ToTable("Clients");
                 });
 
             modelBuilder.Entity("EntityLayer.Entities.Employee", b =>
@@ -209,7 +209,7 @@ namespace DataAccessLayer.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("Invoıces");
+                    b.ToTable("Invoices");
                 });
 
             modelBuilder.Entity("EntityLayer.Entities.InvoiceDetail", b =>
@@ -226,17 +226,12 @@ namespace DataAccessLayer.Migrations
                     b.Property<int>("InvoiceId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ItemId")
+                    b.Property<int?>("ItemId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<string>("SoldProducts")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("InvoiceDetailId");
 
@@ -320,28 +315,6 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("PaymentDetails");
                 });
 
-            modelBuilder.Entity("EntityLayer.Entities.Product", b =>
-                {
-                    b.Property<int>("ProductId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductId"));
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.HasKey("ProductId");
-
-                    b.ToTable("Products");
-                });
-
             modelBuilder.Entity("EntityLayer.Entities.Expense", b =>
                 {
                     b.HasOne("EntityLayer.Entities.ExpenseCategory", "Category")
@@ -396,15 +369,11 @@ namespace DataAccessLayer.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EntityLayer.Entities.Item", "Item")
+                    b.HasOne("EntityLayer.Entities.Item", null)
                         .WithMany("InvoiceDetails")
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ItemId");
 
                     b.Navigation("Invoice");
-
-                    b.Navigation("Item");
                 });
 
             modelBuilder.Entity("EntityLayer.Entities.Payment", b =>

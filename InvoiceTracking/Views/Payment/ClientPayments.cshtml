@@ -1,0 +1,33 @@
+﻿@model List<EntityLayer.Entities.Payment>
+
+@{
+    ViewData["Title"] = "💰 Müşteri Ödeme Geçmişi";
+}
+
+<div class="container mt-4">
+    <h2>💰 Müşteri Ödeme Geçmişi</h2>
+
+    <a asp-action="Index" class="btn btn-secondary mb-3">🔙 Tüm Ödemelere Dön</a>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Tutar</th>
+                <th>Para Birimi</th>
+                <th>Tarih</th>
+                <th>Açıklama</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var payment in Model)
+            {
+                <tr>
+                    <td>@payment.Amount.ToString("N2")</td>
+                    <td>@payment.Currency</td>
+                    <td>@payment.Date.ToShortDateString()</td>
+                    <td>@payment.Description</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -2,11 +2,9 @@
 using DataAccessLayer.Data;
 using EntityLayer.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static EntityLayer.Entities.Enums;
 
 namespace DataAccessLayer.Repository
 {
@@ -19,65 +17,20 @@ namespace DataAccessLayer.Repository
             _context = context;
         }
 
-        // 📌 Tüm Ödeme Detaylarını Getir
-        public async Task<IEnumerable<PaymentDetail>> GetAllPaymentDetailsAsync()
+        // 📌 1️⃣ Belirli bir ödemeye ait tüm detayları getirir
+        public async Task<List<PaymentDetail>> GetDetailsByPaymentIdAsync(int paymentId)
         {
             return await _context.PaymentDetails
-                .Include(pd => pd.Payment) // ✅ Ödeme bilgilerini getir
+                .Where(d => d.PaymentId == paymentId)
+                .AsNoTracking() // Veriyi izleme, sadece oku (performansı artırır)
                 .ToListAsync();
         }
 
-        // 📌 Tek Bir Ödeme Detayı Getir
-        public async Task<PaymentDetail?> GetPaymentDetailByIdAsync(int paymentDetailId)
+        // 📌 2️⃣ Belirli bir ödeme detayını getirir
+        public async Task<PaymentDetail?> GetDetailByIdAsync(int paymentDetailId)
         {
             return await _context.PaymentDetails
-                .Include(pd => pd.Payment)
-                .FirstOrDefaultAsync(pd => pd.PaymentDetailId == paymentDetailId);
-        }
-
-        // 📌 Belirli Bir `PaymentId` İçin Ödeme Detaylarını Getir
-        public async Task<IEnumerable<PaymentDetail>> GetPaymentDetailsByPaymentAsync(int paymentId)
-        {
-            return await _context.PaymentDetails
-                .Where(pd => pd.PaymentId == paymentId)
-                .Include(pd => pd.Payment) // ✅ Bağlı ödeme bilgilerini getir
-                .ToListAsync();
-        }
-
-        // 📌 Yeni Ödeme Detayı Ekle
-        public async Task AddPaymentDetailAsync(PaymentDetail paymentDetail)
-        {
-            paymentDetail.CalculateTotalAmount(); // ✅ Toplam tutarı hesapla
-            await _context.PaymentDetails.AddAsync(paymentDetail);
-            await _context.SaveChangesAsync();
-        }
-
-        // 📌 Ödeme Detayı Güncelle
-        public async Task UpdatePaymentDetailAsync(PaymentDetail paymentDetail)
-        {
-            paymentDetail.CalculateTotalAmount(); // ✅ Güncellemeden önce hesapla
-            _context.PaymentDetails.Update(paymentDetail);
-            await _context.SaveChangesAsync();
-        }
-
-        // 📌 Ödeme Detayı Sil
-        public async Task DeletePaymentDetailAsync(int paymentDetailId)
-        {
-            var paymentDetail = await _context.PaymentDetails.FindAsync(paymentDetailId);
-            if (paymentDetail != null)
-            {
-                _context.PaymentDetails.Remove(paymentDetail);
-                await _context.SaveChangesAsync();
-            }
-        }
-
-        // 📌 Belirli Bir Para Birimi ile Ödeme Detaylarını Getir
-        public async Task<IEnumerable<PaymentDetail>> GetPaymentDetailsByCurrencyAsync(CurrencyType currency)
-        {
-            return await _context.PaymentDetails
-                .Where(pd => pd.Currency == currency)
-                .Include(pd => pd.Payment) // ✅ Bağlı ödeme bilgilerini getir
-                .ToListAsync();
+                .FirstOrDefaultAsync(d => d.PaymentDetailId == paymentDetailId);
         }
     }
 }

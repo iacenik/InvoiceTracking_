@@ -1,97 +1,81 @@
-﻿
-using BusinessLayer.Common;
+﻿using BusinessLayer.Services;
 using EntityLayer.Entities;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace InvoiceTracking.Controllers
+namespace InvoiceSystem.Controllers
 {
     public class ExpenseCategoryController : Controller
     {
-        private readonly IExpenseCategoryRepository _categoryRepository;
+        private readonly IExpenseCategoryService _expenseCategoryService;
 
-        public ExpenseCategoryController(IExpenseCategoryRepository categoryRepository)
+        public ExpenseCategoryController(IExpenseCategoryService expenseCategoryService)
         {
-            _categoryRepository = categoryRepository;
+            _expenseCategoryService = expenseCategoryService;
         }
 
-        // 📌 Tüm Gider Kategorilerini Listeleme
+        // 📌 1️⃣ Tüm gider kategorilerini listele
         public async Task<IActionResult> Index()
         {
-            var categories = await _categoryRepository.GetAllExpenseCategoriesAsync();
+            var categories = await _expenseCategoryService.GetAllCategoriesAsync();
             return View(categories);
         }
 
-        // 📌 Gider Kategori Detayları
-        public async Task<IActionResult> Details(int id)
-        {
-            var category = await _categoryRepository.GetExpenseCategoryByIdAsync(id);
-            if (category == null)
-                return NotFound();
-
-            return View(category);
-        }
-
-        // 📌 Yeni Gider Kategorisi Ekleme Sayfası (Form Göster)
+        // 📌 2️⃣ Yeni gider kategorisi ekleme formu
         public IActionResult Create()
         {
             return View();
         }
 
-        // 📌 Yeni Gider Kategorisi Ekleme (Form POST)
+        // 📌 3️⃣ Yeni gider kategorisi ekleme işlemi
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ExpenseCategory category)
         {
             if (ModelState.IsValid)
             {
-                await _categoryRepository.AddExpenseCategoryAsync(category);
+                await _expenseCategoryService.AddCategoryAsync(category);
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
         }
 
-        // 📌 Gider Kategorisi Güncelleme Sayfası (Form Göster)
+        // 📌 4️⃣ Gider kategorisi güncelleme formu
         public async Task<IActionResult> Edit(int id)
         {
-            var category = await _categoryRepository.GetExpenseCategoryByIdAsync(id);
+            var category = await _expenseCategoryService.GetCategoryByIdAsync(id);
             if (category == null)
                 return NotFound();
 
             return View(category);
         }
 
-        // 📌 Gider Kategorisi Güncelleme (Form POST)
+        // 📌 5️⃣ Gider kategorisi güncelleme işlemi
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, ExpenseCategory category)
+        public async Task<IActionResult> Edit(ExpenseCategory category)
         {
-            if (id != category.CategoryId)
-                return NotFound();
-
             if (ModelState.IsValid)
             {
-                await _categoryRepository.UpdateExpenseCategoryAsync(category);
+                await _expenseCategoryService.UpdateCategoryAsync(category);
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
         }
 
-        // 📌 Gider Kategorisi Silme Sayfası (Onay İçin)
+        // 📌 6️⃣ Gider kategorisi silme işlemi
         public async Task<IActionResult> Delete(int id)
         {
-            var category = await _categoryRepository.GetExpenseCategoryByIdAsync(id);
+            var category = await _expenseCategoryService.GetCategoryByIdAsync(id);
             if (category == null)
                 return NotFound();
 
             return View(category);
         }
 
-        // 📌 Gider Kategorisi Silme İşlemi
         [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _categoryRepository.DeleteExpenseCategoryAsync(id);
+            await _expenseCategoryService.DeleteCategoryAsync(id);
             return RedirectToAction(nameof(Index));
         }
     }

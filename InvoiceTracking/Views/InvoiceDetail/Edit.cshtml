@@ -1,49 +1,110 @@
 ﻿@model EntityLayer.Entities.InvoiceDetail
 
 @{
-    ViewData["Title"] = "Fatura Detayı Düzenle";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Fatura Detayını Düzenle";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="container mt-4">
+    <h2>✏ Fatura Detayını Düzenle</h2>
 
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="InvoiceDetailId" />
+    <form asp-action="Edit" id="invoiceForm">
+        <input type="hidden" asp-for="InvoiceDetailId" />
+        <input type="hidden" asp-for="InvoiceId" />
 
-    <div class="mb-3">
-        <label class="form-label">Fatura ID</label>
-        <select asp-for="InvoiceId" asp-items="ViewBag.InvoiceId" class="form-select">
-            <option value="">Fatura Seçiniz</option>
-        </select>
-    </div>
+        <div class="mb-3">
+            <label class="form-label">Para Birimi</label>
+            <select asp-for="Currency" class="form-control">
+                <option value="EUR">💶 EUR</option>
+                <option value="RON">🇷🇴 RON</option>
+                <option value="USD">💵 USD</option>
+            </select>
+        </div>
 
-    <div class="mb-3">
-        <label class="form-label">Ürün</label>
-        <select asp-for="ItemId" asp-items="ViewBag.ItemId" class="form-select">
-            <option value="">Ürün Seçiniz</option>
-        </select>
-    </div>
+        <!-- Ürün Ekleme Alanı -->
+        <h5>Ürünler</h5>
+        <table class="table table-bordered" id="productTable">
+            <thead class="table-dark">
+                <tr>
+                    <th>Ürün Adı</th>
+                    <th>Birim Fiyat</th>
+                    <th>Adet</th>
+                    <th>Toplam Fiyat</th>
+                    <th>İşlem</th>
+                </tr>
+            </thead>
+            <tbody id="productBody">
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-success" id="addProductBtn">➕ Ürün Ekle</button>
 
-    <div class="mb-3">
-        <label class="form-label">Miktar</label>
-        <input asp-for="Quantity" class="form-control" type="number" min="1" />
-    </div>
+        <!-- SoldProducts JSON -->
+        <input type="hidden" asp-for="SoldProducts" id="SoldProducts" />
 
-    <div class="mb-3">
-        <label class="form-label">Birim Fiyat</label>
-        <input asp-for="UnitPrice" class="form-control" type="number" step="0.01" />
-    </div>
+        <button type="submit" class="btn btn-warning mt-3">💾 Güncelle</button>
+        <a asp-action="InvoiceDetails" asp-route-invoiceId="@Model.InvoiceId" class="btn btn-secondary mt-3">❌ İptal</a>
+    </form>
+</div>
 
-    <div class="mb-3">
-        <label class="form-label">Para Birimi</label>
-        <select asp-for="Currency" class="form-select">
-            <option value="RON">RON</option>
-            <option value="EUR">EUR</option>
-            <option value="USD">USD</option>
-            <option value="TL">TL</option>
-        </select>
-    </div>
+@section Scripts {
+    <script>
+        let products = [];
 
-    <button type="submit" class="btn btn-success">Güncelle</button>
-    <a asp-action="Index" class="btn btn-secondary">İptal</a>
-</form>
+        function updateJsonField() {
+            document.getElementById("SoldProducts").value = JSON.stringify(products);
+        }
+
+        function calculateTotalPrice(index) {
+            let unitPrice = parseFloat(document.getElementById(`unitPrice_${index}`).value) || 0;
+            let quantity = parseInt(document.getElementById(`quantity_${index}`).value) || 1;
+            let totalPrice = unitPrice * quantity;
+
+            document.getElementById(`totalPrice_${index}`).innerText = totalPrice.toFixed(2);
+            products[index].UnitPrice = unitPrice;
+            products[index].Quantity = quantity;
+            products[index].TotalPrice = totalPrice;
+            updateJsonField();
+        }
+
+        function removeProduct(index) {
+            products.splice(index, 1);
+            renderProductTable();
+        }
+
+        function renderProductTable() {
+            let productBody = document.getElementById("productBody");
+            productBody.innerHTML = "";
+            products.forEach((product, index) => {
+                productBody.innerHTML += `
+                    <tr>
+                        <td><input type="text" class="form-control" id="productName_${index}" value="${product.ProductName}" oninput="products[${index}].ProductName = this.value; updateJsonField();"></td>
+                        <td><input type="number" class="form-control" id="unitPrice_${index}" value="${product.UnitPrice}" step="0.01" oninput="calculateTotalPrice(${index})"></td>
+                        <td><input type="number" class="form-control" id="quantity_${index}" value="${product.Quantity}" min="1" oninput="calculateTotalPrice(${index})"></td>
+                        <td id="totalPrice_${index}">${product.TotalPrice.toFixed(2)}</td>
+                        <td><button type="button" class="btn btn-danger" onclick="removeProduct(${index})">🗑</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById("addProductBtn").addEventListener("click", function () {
+            let newProduct = { ProductName: "", UnitPrice: 0, Quantity: 1, TotalPrice: 0 };
+            products.push(newProduct);
+            renderProductTable();
+        });
+
+        // Mevcut ürünleri yükle
+        window.onload = function () {
+            let existingProducts = '@Html.Raw(Model.SoldProducts)';
+            if (existingProducts) {
+                try {
+                    products = JSON.parse(existingProducts);
+                } catch (error) {
+                    console.error("JSON parse hatası:", error);
+                    products = [];
+                }
+            }
+            renderProductTable();
+            updateJsonField();
+        };
+    </script>
+}

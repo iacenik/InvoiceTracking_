@@ -1,6 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using static EntityLayer.Entities.Enums; // CurrencyType enum'unu kullanabilmek için
+using System.Linq;
+using System.Text.Json;
+using static EntityLayer.Entities.Enums;
+using EntityLayer.Entities; // 🔹 SoldProduct buradan geliyor!
 
 namespace EntityLayer.Entities
 {
@@ -13,29 +18,42 @@ namespace EntityLayer.Entities
         [Required]
         public int InvoiceId { get; set; }
         [ForeignKey("InvoiceId")]
-        public virtual Invoice? Invoice { get; set; } // 🔗 Fatura ile ilişki
+        public virtual Invoice? Invoice { get; set; }
+
+        public string SoldProducts { get; set; } = "[]"; // JSON olarak saklanan ürünler
 
         [Required]
-        public int ItemId { get; set; }
-        [ForeignKey("ItemId")]
-        public virtual Item? Item { get; set; } // 🔗 Ürün ile ilişki
+        public CurrencyType Currency { get; set; } = CurrencyType.EUR;
 
-        [Required]
-        public int Quantity { get; set; } // 🔍 Ürün adedi
+        [NotMapped]
+        public decimal TotalAmount { get; private set; } = 0m;
 
-        [Required]
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal UnitPrice { get; set; } // 🔍 Kullanıcı manuel olarak fiyatı girer
+        // 📌 JSON'dan deserialize edilen ürün listesi
+        [NotMapped]
+        public List<SoldProduct> SoldProductsList => string.IsNullOrWhiteSpace(SoldProducts)
+            ? new List<SoldProduct>()
+            : JsonSerializer.Deserialize<List<SoldProduct>>(SoldProducts) ?? new List<SoldProduct>();
 
-        [Required]
-        public CurrencyType Currency { get; set; } // 🔍 Para birimi (RON, EUR, USD, TL)
+        // 📌 Fatura detayının toplam tutarını hesaplar
+        [NotMapped]
+        public decimal TotalPrice => SoldProductsList.Sum(p => p.TotalPrice);
 
-        [NotMapped] // 🔍 Veritabanına kaydedilmesini engeller
-        public decimal TotalPrice { get; private set; } // 🔍 `private set` ekledik!
-
-        public void CalculateTotalPrice() // 🔍 Setter olmadığı için hesaplamayı burada yapıyoruz
+        public void CalculateTotalAmount()
         {
-            TotalPrice = UnitPrice * Quantity;
+            try
+            {
+                TotalAmount = SoldProductsList.Sum(p => p.TotalPrice);
+            }
+            catch (JsonException)
+            {
+                TotalAmount = 0;
+            }
+        }
+
+        public void SetSoldProducts(List<SoldProduct> products)
+        {
+            SoldProducts = JsonSerializer.Serialize(products);
+            CalculateTotalAmount();
         }
     }
 }
