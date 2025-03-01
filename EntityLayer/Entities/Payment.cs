@@ -15,6 +15,7 @@ namespace EntityLayer.Entities
 
         [Required]
         public int ClientId { get; set; } // Ödemeyi yapan müşteri
+
         [ForeignKey("ClientId")]
         public virtual Client? Client { get; set; } // 🔗 Müşteri ile ilişki
 
@@ -30,7 +31,7 @@ namespace EntityLayer.Entities
 
         // 🔍 `Amount` otomatik hesaplanıyor (PaymentDetail toplamı)
         [NotMapped]
-        public decimal Amount { get; private set; } = 0m;// 🔍 private set ekledik!
+        public decimal Amount { get; private set; } = 0m;
 
         public void CalculateAmount() // 🔍 Setter olmadığı için hesaplamayı burada yapıyoruz
         {

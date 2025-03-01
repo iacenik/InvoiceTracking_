@@ -1,46 +1,75 @@
-﻿@model EntityLayer.Entities.Expense
-
+﻿@* Views/CashRegister/DeductExpense.cshtml *@
+@model InvoiceTracking.Models.CashRegisterViewModel
 @{
-    ViewData["Title"] = "Gider Güncelle";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Gider Ekle";
 }
 
-<div class="container mt-4">
-    <h2 class="text-center">Gider Güncelle</h2>
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-danger">Kasadan Gider Düş</h6>
+                    <a asp-action="Index" class="btn btn-sm btn-secondary">
+                        <i class="fas fa-arrow-left fa-sm fa-fw"></i> Geri Dön
+                    </a>
+                </div>
+                <div class="card-body">
+                    <form asp-action="DeductExpense" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
-    <form asp-action="Edit" method="post">
-        <input type="hidden" asp-for="ExpenseId" />
+                        <div class="mb-3">
+                            <label asp-for="Amount" class="form-label">Gider Tutarı</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-money-bill-wave"></i></span>
+                                <input asp-for="Amount" class="form-control" placeholder="0.00" min="0.01" step="0.01" />
+                            </div>
+                            <span asp-validation-for="Amount" class="text-danger"></span>
+                        </div>
 
-        <div class="form-group">
-            <label>Çalışan</label>
-            <select asp-for="EmployeeId" class="form-control" asp-items="ViewBag.Employees"></select>
+                        <div class="mb-3">
+                            <label asp-for="Currency" class="form-label">Para Birimi</label>
+                            <select asp-for="Currency" class="form-select" asp-items="Html.GetEnumSelectList<EntityLayer.Entities.Enums.CurrencyType>()">
+                                <option value="">-- Para Birimi Seçin --</option>
+                            </select>
+                            <span asp-validation-for="Currency" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Açıklama</label>
+                            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Gider kaydı için açıklama..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="text-center">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-times fa-sm fa-fw"></i> İptal
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-check fa-sm fa-fw"></i> Gideri Kaydet
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Bilgi Kartı -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Gider Ekleme Hakkında</h6>
+                </div>
+                <div class="card-body">
+                    <p>Gider düşme işlemi, kasadan çıkan paraların kaydedilmesini sağlar. Bu işlem, tedarikçilere yapılan ödemeler, maaşlar, vergiler veya diğer işletme giderleri için kullanılabilir.</p>
+                    <p>Düşülecek giderin tutarını ve para birimini doğru bir şekilde belirtmek önemlidir. Açıklama alanına, giderin nedeni veya alıcısı hakkında bilgi ekleyebilirsiniz.</p>
+                    <p class="mb-0"><strong>Uyarı:</strong> Gider eklendiğinde, belirtilen para birimindeki toplam gider tutarı otomatik olarak güncellenir ve kasa bakiyesi azalır.</p>
+                </div>
+            </div>
         </div>
-
-        <div class="form-group">
-            <label>Gider Türü</label>
-            <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories"></select>
-        </div>
-
-        <div class="form-group">
-            <label>Miktar</label>
-            <input asp-for="Amount" type="number" class="form-control" required />
-        </div>
-
-        <div class="form-group">
-            <label>Para Birimi</label>
-            <select asp-for="Currency" class="form-control">
-                <option value="EUR">EUR</option>
-                <option value="RON">RON</option>
-                <option value="USD">USD</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Açıklama</label>
-            <textarea asp-for="Description" class="form-control"></textarea>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Güncelle</button>
-        <a asp-action="Index" class="btn btn-secondary">Geri</a>
-    </form>
+    </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

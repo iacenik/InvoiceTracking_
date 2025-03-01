@@ -8,8 +8,9 @@ namespace EntityLayer.Entities
     public class Client
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // Artık otomatik artmayacak, sen belirleyeceksin.
-        public int ClientId { get; set; } // Örneğin: 1, 2, 3 yerine "001", "111" gibi belirleyebilirsin.
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int ClientId { get; set; }
+
         [Required]
         public int ClientCode { get; set; }
 
@@ -33,7 +34,6 @@ namespace EntityLayer.Entities
         public DateTime CreatedAt { get; set; } = DateTime.Now; // Müşterinin eklendiği tarih
 
         public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
-
         public virtual ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
     }
 }

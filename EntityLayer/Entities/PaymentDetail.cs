@@ -17,6 +17,7 @@ namespace EntityLayer.Entities
 
         [Required]
         public int PaymentId { get; set; }
+
         [ForeignKey("PaymentId")]
         public virtual Payment? Payment { get; set; }
 

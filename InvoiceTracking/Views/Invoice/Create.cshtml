@@ -1,27 +1,327 @@
-﻿@model EntityLayer.Entities.Invoice
+﻿@* Views/Invoice/Create.cshtml *@
+@model InvoiceTracking.Models.InvoiceViewModel
+@{
+    ViewData["Title"] = "Yeni Fatura";
+}
 
-<h2>Create Invoice</h2>
+<div class="container-fluid">
+    <!-- Sayfa Başlığı -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Yeni Fatura</h1>
+        <a asp-action="Index" class="btn btn-secondary btn-sm shadow-sm">
+            <i class="fas fa-arrow-left fa-sm"></i> Listeye Dön
+        </a>
+    </div>
 
-<form asp-action="Create" method="post">
-    <div class="form-group">
-        <label for="ClientId">Client</label>
-        <select asp-for="ClientId" asp-items="ViewBag.Clients" class="form-control"></select>
+    <form asp-action="Create" method="post">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="row">
+            <div class="col-xl-8">
+                <!-- Fatura Bilgileri Kartı -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Fatura Bilgileri</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Date" class="form-label">Fatura Tarihi</label>
+                                    <input asp-for="Date" type="date" class="form-control" />
+                                    <span asp-validation-for="Date" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="ClientId" class="form-label">Müşteri</label>
+                                    <select asp-for="ClientId" class="form-select" asp-items="ViewBag.Clients">
+                                        <option value="">-- Müşteri Seçin --</option>
+                                    </select>
+                                    <span asp-validation-for="ClientId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="CategoryId" class="form-label">Kategori</label>
+                                    <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.Categories">
+                                        <option value="">-- Kategori Seçin --</option>
+                                    </select>
+                                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="EmployeeId" class="form-label">Düzenleyen</label>
+                                    <select asp-for="EmployeeId" class="form-select" asp-items="ViewBag.Employees">
+                                        <option value="">-- Çalışan Seçin --</option>
+                                    </select>
+                                    <span asp-validation-for="EmployeeId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Currency" class="form-label">Para Birimi</label>
+                                    <select asp-for="Currency" class="form-select" asp-items="ViewBag.CurrencyTypes">
+                                        <option value="">-- Para Birimi Seçin --</option>
+                                    </select>
+                                    <span asp-validation-for="Currency" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="InvoiceType" class="form-label">Fatura Türü</label>
+                                    <select asp-for="InvoiceType" class="form-select" asp-items="ViewBag.InvoiceTypes">
+                                        <option value="">-- Fatura Türü Seçin --</option>
+                                    </select>
+                                    <span asp-validation-for="InvoiceType" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ürün Ekleme Kartı -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary">Ürünler</h6>
+                        <button type="button" class="btn btn-success btn-sm" id="addProductBtn">
+                            <i class="fas fa-plus"></i> Ürün Ekle
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="productsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Ürün ID</th>
+                                        <th>Ürün Adı</th>
+                                        <th>Birim Fiyat</th>
+                                        <th>Miktar</th>
+                                        <th>Toplam</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productRows">
+                                    <!-- JavaScript ile dinamik olarak eklenecek -->
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="4" class="text-right">Genel Toplam:</th>
+                                        <th id="grandTotal">0.00</th>
+                                        <th></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-4">
+                <!-- Ödeme Durumu ve Düğmeler -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Fatura Ayarları</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input asp-for="IsPaid" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsPaid" class="form-check-label">Ödendi olarak işaretle</label>
+                            </div>
+                            <small class="form-text text-muted">
+                                Bu seçeneği işaretlerseniz, fatura onaylanmış sayılacak ve kasa bakiyesinden düşülecektir.
+                            </small>
+                        </div>
+
+                        <hr>
+
+                        <div class="text-center mb-3">
+                            <h4 id="previewTotal">0.00</h4>
+                            <div class="small text-muted">Toplam Tutar</div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-save"></i> Faturayı Kaydet
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary btn-block">
+                                <i class="fas fa-times"></i> İptal
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Ürün Ekleme Modal -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addProductModalLabel">Ürün Ekle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="productId" class="form-label">Ürün ID</label>
+                        <select id="productId" class="form-select">
+                            <option value="">-- Ürün Seçin --</option>
+                            @foreach (var item in ViewBag.Items ?? new SelectList(new List<SelectListItem>()))
+                            {
+                                <option value="@item.Value" data-name="@item.Text">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="productName" class="form-label">Ürün Adı</label>
+                        <input type="text" class="form-control" id="productName">
+                    </div>
+                    <div class="mb-3">
+                        <label for="unitPrice" class="form-label">Birim Fiyat</label>
+                        <input type="number" class="form-control" id="unitPrice" step="0.01" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="quantity" class="form-label">Miktar</label>
+                        <input type="number" class="form-control" id="quantity" min="1" value="1">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="button" class="btn btn-primary" id="saveProductBtn">Ekle</button>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="Date">Date</label>
-        <input asp-for="Date" class="form-control" type="date" />
-    </div>
-    <div class="form-group">
-        <label for="TotalAmount">Total Amount</label>
-        <input asp-for="TotalAmount" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label for="Currency">Currency</label>
-        <select asp-for="Currency" class="form-control">
-            <option value="EUR">EUR</option>
-            <option value="RON">RON</option>
-            <option value="USD">USD</option>
-        </select>
-    </div>
-    <button type="submit" class="btn btn-success">Save</button>
-</form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        $(document).ready(function() {
+            let products = [];
+            let rowCounter = 0;
+
+            // Ürün Ekleme Butonuna Tıklama
+            $('#addProductBtn').click(function() {
+                $('#productId').val('');
+                $('#productName').val('');
+                $('#unitPrice').val('');
+                $('#quantity').val(1);
+                $('#addProductModal').modal('show');
+            });
+
+            // Ürün Seçimi Değiştiğinde
+            $('#productId').change(function() {
+                let selectedOption = $(this).find('option:selected');
+                if (selectedOption.val()) {
+                    $('#productName').val(selectedOption.data('name'));
+                }
+            });
+
+            // Ürün Kaydetme
+            $('#saveProductBtn').click(function() {
+                let productId = $('#productId').val() || 0;
+                let productName = $('#productName').val();
+                let unitPrice = parseFloat($('#unitPrice').val());
+                let quantity = parseInt($('#quantity').val());
+
+                if (!productName || isNaN(unitPrice) || isNaN(quantity) || unitPrice <= 0 || quantity <= 0) {
+                    alert('Lütfen tüm alanları doğru şekilde doldurun.');
+                    return;
+                }
+
+                let totalPrice = unitPrice * quantity;
+                let currencySymbol = getCurrencySymbol();
+
+                // Ürün Dizisine Ekle
+                let product = {
+                    ProductId: productId,
+                    ProductName: productName,
+                    UnitPrice: unitPrice,
+                    Quantity: quantity,
+                    TotalPrice: totalPrice,
+                    Currency: $('#Currency').val()
+                };
+
+                products.push(product);
+                rowCounter++;
+
+                // Tabloyu Güncelle
+                let newRow = `
+                    <tr id="row${rowCounter}">
+                        <td>${productId}</td>
+                        <td>${productName}</td>
+                        <td class="text-right">${unitPrice.toFixed(2)} ${currencySymbol}</td>
+                        <td class="text-center">${quantity}</td>
+                        <td class="text-right">${totalPrice.toFixed(2)} ${currencySymbol}</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-danger btn-sm" onclick="removeProduct(${rowCounter})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <input type="hidden" name="Products[${rowCounter}].ProductId" value="${productId}">
+                            <input type="hidden" name="Products[${rowCounter}].ProductName" value="${productName}">
+                            <input type="hidden" name="Products[${rowCounter}].UnitPrice" value="${unitPrice}">
+                            <input type="hidden" name="Products[${rowCounter}].Quantity" value="${quantity}">
+                            <input type="hidden" name="Products[${rowCounter}].Currency" value="${$('#Currency').val()}">
+                        </td>
+                    </tr>
+                `;
+                $('#productRows').append(newRow);
+
+                // Toplamı Güncelle
+                updateTotals();
+
+                // Modalı Kapat
+                $('#addProductModal').modal('hide');
+            });
+
+            // Para Birimi Değiştiğinde
+            $('#Currency').change(function() {
+                updateTotals();
+            });
+        });
+
+        // Ürün Satırını Kaldır
+        function removeProduct(rowId) {
+            $(`#row${rowId}`).remove();
+            products = products.filter(p => p.rowId !== rowId);
+            updateTotals();
+        }
+
+        // Toplamları Güncelle
+        function updateTotals() {
+            let total = 0;
+            $('#productRows tr').each(function() {
+                let price = parseFloat($(this).find('td:eq(4)').text().split(' ')[0]);
+                if (!isNaN(price)) {
+                    total += price;
+                }
+            });
+
+            let currencySymbol = getCurrencySymbol();
+            $('#grandTotal').text(`${total.toFixed(2)} ${currencySymbol}`);
+            $('#previewTotal').text(`${total.toFixed(2)} ${currencySymbol}`);
+        }
+
+        // Para Birimi Sembolü
+        function getCurrencySymbol() {
+            let currency = $('#Currency').val();
+            switch (currency) {
+                case "0": return "RON";
+                case "1": return "€";
+                case "2": return "$";
+                default: return "";
+            }
+        }
+    </script>
+}

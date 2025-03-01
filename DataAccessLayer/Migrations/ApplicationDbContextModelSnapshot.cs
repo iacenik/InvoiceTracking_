@@ -51,6 +51,18 @@ namespace DataAccessLayer.Migrations
                     b.HasKey("CashRegisterId");
 
                     b.ToTable("CashRegisters");
+
+                    b.HasData(
+                        new
+                        {
+                            CashRegisterId = 1,
+                            TotalExpenseEUR = 0m,
+                            TotalExpenseRON = 0m,
+                            TotalExpenseUSD = 0m,
+                            TotalIncomeEUR = 0m,
+                            TotalIncomeRON = 0m,
+                            TotalIncomeUSD = 0m
+                        });
                 });
 
             modelBuilder.Entity("EntityLayer.Entities.Client", b =>
@@ -268,9 +280,6 @@ namespace DataAccessLayer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"));
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<int>("ClientId")
                         .HasColumnType("int");
 
@@ -320,13 +329,13 @@ namespace DataAccessLayer.Migrations
                     b.HasOne("EntityLayer.Entities.ExpenseCategory", "Category")
                         .WithMany("Expenses")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EntityLayer.Entities.Employee", "Employee")
                         .WithMany("Expenses")
                         .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
@@ -339,19 +348,19 @@ namespace DataAccessLayer.Migrations
                     b.HasOne("EntityLayer.Entities.ExpenseCategory", "Category")
                         .WithMany("Invoices")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EntityLayer.Entities.Client", "Client")
                         .WithMany("Invoices")
                         .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EntityLayer.Entities.Employee", "Employee")
                         .WithMany()
                         .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
@@ -381,7 +390,7 @@ namespace DataAccessLayer.Migrations
                     b.HasOne("EntityLayer.Entities.Client", "Client")
                         .WithMany("Payments")
                         .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Client");

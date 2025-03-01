@@ -6,11 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@ViewData["Title"] - Mone Panel</title>
 
+    <!-- Favicon -->
+    <link rel="icon" href="~/img/favicon.ico" type="image/x-icon">
+
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="~/Admin/plugins/fontawesome-free/css/all.min.css">
-    <!-- Theme style -->
+
+    <!-- AdminLTE Theme Style -->
     <link rel="stylesheet" href="~/Admin/dist/css/adminlte.min.css">
 </head>
 
@@ -26,7 +31,7 @@
                     </a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
-                    <a href="@Url.Action("Index", "Home")" class="nav-link">Home</a>
+                    <a href="@Url.Action("Index", "Home")" class="nav-link">Ana Sayfa</a>
                 </li>
             </ul>
         </nav>
@@ -34,8 +39,8 @@
         <!-- Sidebar -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <a href="@Url.Action("Index", "Home")" class="brand-link">
-                <img src="~/img/mone plint.png" alt="Logo" class="brand-image img-circle elevation-3">
-                <span class="brand-text font-weight-light">Admin Panel</span>
+                <img src="~/img/mone-plint.png" alt="Logo" class="brand-image img-circle elevation-3">
+                <span class="brand-text font-weight-light">Mone Panel</span>
             </a>
 
             <div class="sidebar">
@@ -43,14 +48,14 @@
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <li class="nav-item">
                             <a href="@Url.Action("Index", "CashRegister")" class="nav-link">
-                                <i class="nav-icon fas fa-tachometer-alt"></i>
-                                <p>Cash Register</p>
+                                <i class="nav-icon fas fa-cash-register"></i>
+                                <p>Kasa</p>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="@Url.Action("Index", "Client")" class="nav-link">
                                 <i class="nav-icon fas fa-users"></i>
-                                <p>Müşteri</p>
+                                <p>Müşteriler</p>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -60,40 +65,27 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="@Url.Action("Index","ExpenseCategory")" class="nav-link">
-                                <i class="nav-icon fas fa-ruler"></i>
-                                <p>Kategori Çelitleri</p>
-                            </a>
-
-                        </li>
-                        <li class="nav-item">
-                            <a href="@Url.Action("Index","Expense")" class="nav-link">
-                                <i class="nav-icon fas fa-ruler"></i>
-                                <p>Gider</p>
+                            <a href="@Url.Action("Index", "ExpenseCategory")" class="nav-link">
+                                <i class="nav-icon fas fa-layer-group"></i>
+                                <p>Kategori Çeşitleri</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="@Url.Action("Index","Invoice")" class="nav-link">
+                            <a href="@Url.Action("Index", "Expense")" class="nav-link">
+                                <i class="nav-icon fas fa-money-check-alt"></i>
+                                <p>Giderler</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index", "Invoice")" class="nav-link">
                                 <i class="nav-icon fas fa-file-invoice"></i>
-                                <p>Fatura</p>
+                                <p>Faturalar</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="@Url.Action("Index","InvoiceDetail")" class="nav-link">
-                                <i class="nav-icon fas fa-file-invoice-dollar"></i>
-                                <p>Fatura Detayı</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="@Url.Action("Index","Payment")" class="nav-link">
+                            <a href="@Url.Action("Index", "Payment")" class="nav-link">
                                 <i class="nav-icon fas fa-money-bill-wave"></i>
                                 <p>Ödemeler</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="@Url.Action("Index","PaymentDetail")" class="nav-link">
-                                <i class="nav-icon fas fa-list-alt"></i>
-                                <p>Ödeme Detayları</p>
                             </a>
                         </li>
                     </ul>
@@ -104,12 +96,22 @@
         <!-- Main Content -->
         <div class="content-wrapper">
             <section class="content-header">
-                <h1>@ViewData["Title"]</h1>
+                <div class="container-fluid">
+                    <h1 class="text-dark">@ViewData["Title"]</h1>
+                </div>
             </section>
+
             <section class="content">
-                @RenderBody()
+                <div class="container-fluid">
+                    @RenderBody()
+                </div>
             </section>
         </div>
+
+        <!-- Footer -->
+        <footer class="main-footer text-center">
+            <strong>&copy; 2025 <a href="https://mone.com">Mone</a></strong> | Tüm Hakları Saklıdır.
+        </footer>
     </div>
 
     <!-- Scripts -->

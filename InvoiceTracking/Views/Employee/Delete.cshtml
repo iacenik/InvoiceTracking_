@@ -1,25 +1,63 @@
 ﻿@model EntityLayer.Entities.Employee
-
 @{
     ViewData["Title"] = "Çalışan Sil";
-    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
-    <h2 class="text-danger text-center">Çalışan Sil</h2>
+<div class="container-fluid">
+    <!-- Sayfa Başlığı -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Çalışan Sil</h1>
+        <a asp-action="Index" class="btn btn-secondary btn-sm shadow-sm">
+            <i class="fas fa-arrow-left fa-sm"></i> Listeye Dön
+        </a>
+    </div>
 
-    <p class="text-center">Bu çalışanı silmek istediğinize emin misiniz?</p>
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Çalışan Sil Kartı -->
+            <div class="card shadow mb-4 border-left-danger">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger">Bu çalışanı silmek istediğinizden emin misiniz?</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Dikkat: Bu işlem geri alınamaz! Çalışanı silerseniz, ona ait tüm gider kayıtları da silinecektir.
+                    </div>
 
-    <h4 class="text-center"><strong>@Model.EmployeeName @Model.EmployeeSurname</strong></h4>
+                    <div class="table-responsive mt-4">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th style="width: 200px;">Çalışan ID</th>
+                                <td>@Model.EmployeeId</td>
+                            </tr>
+                            <tr>
+                                <th>Adı</th>
+                                <td>@Model.EmployeeName</td>
+                            </tr>
+                            <tr>
+                                <th>Soyadı</th>
+                                <td>@Model.EmployeeSurname</td>
+                            </tr>
+                            <tr>
+                                <th>Gider Sayısı</th>
+                                <td>
+                                    <span class="badge bg-info text-white">@Model.Expenses.Count</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
 
-    <form asp-action="DeleteConfirmed" method="post">
-        <input type="hidden" asp-for="EmployeeId" />
-
-        <div class="text-center mt-4">
-            <button type="submit" class="btn btn-danger">Sil</button>
-            <a asp-action="Index" class="btn btn-secondary">İptal</a>
+                    <form asp-action="Delete" method="post" class="mt-4 text-center">
+                        <input type="hidden" asp-for="EmployeeId" />
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> İptal
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Çalışanı Sil
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
-    </form>
+    </div>
 </div>
-
-

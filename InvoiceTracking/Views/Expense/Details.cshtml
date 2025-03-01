@@ -1,0 +1,127 @@
+﻿@* Views/Expense/Details.cshtml *@
+@model EntityLayer.Entities.Expense
+@{
+    ViewData["Title"] = "Gider Detayları";
+}
+
+<div class="container-fluid">
+    <!-- Sayfa Başlığı -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Gider Detayları</h1>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.ExpenseId" class="btn btn-primary btn-sm shadow-sm">
+                <i class="fas fa-edit fa-sm"></i> Düzenle
+            </a>
+            <a asp-action="Index" class="btn btn-secondary btn-sm shadow-sm">
+                <i class="fas fa-arrow-left fa-sm"></i> Listeye Dön
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <!-- Gider Bilgileri Kartı -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger">Gider Bilgileri</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h5 class="font-weight-bold">Temel Bilgiler</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <th style="width: 200px;">Gider ID</th>
+                                            <td>@Model.ExpenseId</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Tarih</th>
+                                            <td>@Model.Date.ToString("dd.MM.yyyy")</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Tutar</th>
+                                            <td>
+                                                <span class="font-weight-bold">
+                                                    @Model.Amount.ToString("N2")
+                                                    @if (Model.Currency == EntityLayer.Entities.Enums.CurrencyType.EUR)
+                                                    {
+                                                        <span>€</span>
+                                                    }
+                                                    else if (Model.Currency == EntityLayer.Entities.Enums.CurrencyType.RON)
+                                                    {
+                                                        <span>RON</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>$</span>
+                                                    }
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Para Birimi</th>
+                                            <td>
+                                                @if (Model.Currency == EntityLayer.Entities.Enums.CurrencyType.EUR)
+                                                {
+                                                    <span class="badge bg-primary">EUR</span>
+                                                }
+                                                else if (Model.Currency == EntityLayer.Entities.Enums.CurrencyType.RON)
+                                                {
+                                                    <span class="badge bg-success">RON</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-info">USD</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h5 class="font-weight-bold">İlişkili Bilgiler</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <th style="width: 200px;">Kategori</th>
+                                            <td>
+                                                <span class="badge bg-primary">@(Model.Category?.CategoryName ?? "-")</span>
+                                                @if (!string.IsNullOrEmpty(Model.Category?.Description))
+                                                {
+                                                    <small class="d-block text-muted mt-1">@Model.Category.Description</small>
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Çalışan</th>
+                                            <td>
+                                                @if (Model.Employee != null)
+                                                {
+                                                    <a asp-controller="Employee" asp-action="Details" asp-route-id="@Model.EmployeeId" class="font-weight-bold">
+                                                        @($"{Model.Employee.EmployeeName} {Model.Employee.EmployeeSurname}")
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <span>-</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Açıklama</th>
+                                            <td>@(string.IsNullOrEmpty(Model.Description) ? "-" : Model.Description)</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

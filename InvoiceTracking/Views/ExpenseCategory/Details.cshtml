@@ -1,0 +1,273 @@
+﻿@* Views/ExpenseCategory/Details.cshtml *@
+@model EntityLayer.Entities.ExpenseCategory
+@{
+    ViewData["Title"] = "Kategori Detayları";
+}
+
+<div class="container-fluid">
+    <!-- Sayfa Başlığı -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Kategori Detayları</h1>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.CategoryId" class="btn btn-primary btn-sm shadow-sm">
+                <i class="fas fa-edit fa-sm"></i> Düzenle
+            </a>
+            <a asp-action="Index" class="btn btn-secondary btn-sm shadow-sm">
+                <i class="fas fa-arrow-left fa-sm"></i> Listeye Dön
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <!-- Kategori Bilgileri Kartı -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Kategori Bilgileri</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th style="width: 200px;">Kategori ID</th>
+                                <td>@Model.CategoryId</td>
+                            </tr>
+                            <tr>
+                                <th>Kategori Adı</th>
+                                <td>
+                                    <span class="font-weight-bold">@Model.CategoryName</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Açıklama</th>
+                                <td>@(string.IsNullOrEmpty(Model.Description) ? "-" : Model.Description)</td>
+                            </tr>
+                            <tr>
+                                <th>Gider Sayısı</th>
+                                <td>
+                                    <span class="badge bg-info text-white">@Model.Expenses.Count</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <!-- Para Birimi Bazında Giderler -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Para Birimi Bazında Giderler</h6>
+                </div>
+                <div class="card-body">
+                    @{
+                        var eurTotal = Model.Expenses
+                        .Where(e => e.Currency == EntityLayer.Entities.Enums.CurrencyType.EUR)
+                        .Sum(e => e.Amount);
+                        var ronTotal = Model.Expenses
+                        .Where(e => e.Currency == EntityLayer.Entities.Enums.CurrencyType.RON)
+                        .Sum(e => e.Amount);
+                        var usdTotal = Model.Expenses
+                        .Where(e => e.Currency == EntityLayer.Entities.Enums.CurrencyType.USD)
+                        .Sum(e => e.Amount);
+                    }
+
+                    <div class="row">
+                        <div class="col-md-4 mb-4">
+                            <div class="card border-left-primary shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                EUR Toplamı
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">@eurTotal.ToString("N2") €</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-euro-sign fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mb-4">
+                            <div class="card border-left-success shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                RON Toplamı
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ronTotal.ToString("N2") RON</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mb-4">
+                            <div class="card border-left-info shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                USD Toplamı
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">@usdTotal.ToString("N2") $</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-pie pt-4">
+                        <canvas id="expenseDistributionChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-primary"></i> EUR
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-success"></i> RON
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-info"></i> USD
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kategoriye Ait Giderler -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Bu Kategorideki Giderler</h6>
+                    <a asp-controller="Expense" asp-action="Create" asp-route-categoryId="@Model.CategoryId" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> Yeni Gider
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (Model.Expenses != null && Model.Expenses.Any())
+                    {
+                        <div class="table-responsive">
+                            <table id="categoryExpensesTable" class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tarih</th>
+                                        <th>Çalışan</th>
+                                        <th>Tutar</th>
+                                        <th>Para Birimi</th>
+                                        <th>Açıklama</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var expense in Model.Expenses.OrderByDescending(e => e.Date))
+                                    {
+                                        <tr>
+                                            <td>@expense.ExpenseId</td>
+                                            <td>@expense.Date.ToString("dd.MM.yyyy")</td>
+                                            <td>@(expense.Employee != null ? $"{expense.Employee.EmployeeName} {expense.Employee.EmployeeSurname}" : "-")</td>
+                                            <td class="text-right font-weight-bold">@expense.Amount.ToString("N2")</td>
+                                            <td>
+                                                @if (expense.Currency == EntityLayer.Entities.Enums.CurrencyType.EUR)
+                                                {
+                                                    <span class="badge bg-primary">EUR</span>
+                                                }
+                                                else if (expense.Currency == EntityLayer.Entities.Enums.CurrencyType.RON)
+                                                {
+                                                    <span class="badge bg-success">RON</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-info">USD</span>
+                                                }
+                                            </td>
+                                            <td>@(string.IsNullOrEmpty(expense.Description) ? "-" : expense.Description)</td>
+                                            <td>
+                                                <a asp-controller="Expense" asp-action="Details" asp-route-id="@expense.ExpenseId" class="btn btn-info btn-sm">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle"></i> Bu kategoride henüz gider kaydı bulunmamaktadır.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+    <script>
+        $(document).ready(function() {
+            // Gider Tablosu
+            $('#categoryExpensesTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/tr.json'
+                },
+                "order": [[1, "desc"]],
+                "pageLength": 10
+            });
+
+            // Para Birimi Dağılımı Grafiği
+            var ctx = document.getElementById("expenseDistributionChart");
+            var myPieChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ["EUR", "RON", "USD"],
+                    datasets: [{
+                        data: [@eurTotal, @ronTotal, @usdTotal],
+                        backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
+                        hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf'],
+                        hoverBorderColor: "rgba(234, 236, 244, 1)",
+                    }],
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    tooltips: {
+                        backgroundColor: "rgb(255,255,255)",
+                        bodyFontColor: "#858796",
+                        borderColor: '#dddfeb',
+                        borderWidth: 1,
+                        xPadding: 15,
+                        yPadding: 15,
+                        displayColors: false,
+                        caretPadding: 10,
+                    },
+                    legend: {
+                        display: false
+                    },
+                    cutoutPercentage: 80,
+                },
+            });
+        });
+    </script>
+}

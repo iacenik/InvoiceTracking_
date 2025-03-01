@@ -1,35 +1,91 @@
-﻿@model List<EntityLayer.Entities.ExpenseCategory>
-
+﻿@* Views/ExpenseCategory/Index.cshtml *@
+@model IEnumerable<EntityLayer.Entities.ExpenseCategory>
 @{
     ViewData["Title"] = "Gider Kategorileri";
-    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
-    <h2 class="text-center">Gider Kategorileri</h2>
+<div class="container-fluid">
+    <!-- Sayfa Başlığı -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Gider Kategorileri</h1>
+        <div>
+            <a asp-controller="Expense" asp-action="Index" class="btn btn-danger btn-sm shadow-sm">
+                <i class="fas fa-arrow-left fa-sm"></i> Giderlere Dön
+            </a>
+            <a asp-action="Create" class="btn btn-primary btn-sm shadow-sm">
+                <i class="fas fa-plus fa-sm"></i> Yeni Kategori
+            </a>
+        </div>
+    </div>
 
-    <a asp-action="Create" class="btn btn-success mb-3">Yeni Kategori Ekle</a>
-
-    <table class="table table-striped table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th>Kategori Adı</th>
-                <th>Açıklama</th>
-                <th class="text-center">İşlemler</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var category in Model)
-            {
-                <tr>
-                    <td>@category.CategoryName</td>
-                    <td>@(string.IsNullOrWhiteSpace(category.Description) ? "Açıklama Yok" : category.Description)</td>
-                    <td class="text-center">
-                        <a asp-action="Edit" asp-route-id="@category.CategoryId" class="btn btn-primary btn-sm">Düzenle</a>
-                        <a asp-action="Delete" asp-route-id="@category.CategoryId" class="btn btn-danger btn-sm">Sil</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="row">
+        <div class="col-lg-12">
+            <!-- Kategori Listesi Kartı -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Gider Kategorileri Listesi</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="categoriesTable" class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Kategori Adı</th>
+                                    <th>Açıklama</th>
+                                    <th>Gider Sayısı</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var category in Model)
+                                {
+                                    <tr>
+                                        <td>@category.CategoryId</td>
+                                        <td>
+                                            <span class="font-weight-bold">@category.CategoryName</span>
+                                        </td>
+                                        <td>@(string.IsNullOrEmpty(category.Description) ? "-" : category.Description)</td>
+                                        <td>
+                                            <span class="badge bg-info text-white">@category.Expenses.Count</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a asp-action="Details" asp-route-id="@category.CategoryId" class="btn btn-info btn-sm">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </a>
+                                                <a asp-action="Edit" asp-route-id="@category.CategoryId" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@category.CategoryId" class="btn btn-danger btn-sm">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+    <script>
+        $(document).ready(function() {
+            $('#categoriesTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/tr.json'
+                },
+                "order": [[0, "asc"]]
+            });
+        });
+    </script>
+}

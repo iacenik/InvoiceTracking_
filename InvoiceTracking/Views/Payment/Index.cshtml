@@ -1,58 +1,176 @@
-﻿@model List<EntityLayer.Entities.Payment>
-
+﻿@* Views/Payment/Index.cshtml *@
+@model IEnumerable<EntityLayer.Entities.Payment>
 @{
-    ViewData["Title"] = "💰 Ödeme Listesi";
+    ViewData["Title"] = "Ödemeler";
 }
 
-<div class="container mt-4">
-    <h2>💰 Ödeme Listesi</h2>
+<div class="container-fluid">
+    <!-- Sayfa Başlığı -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Ödemeler</h1>
+        <a asp-action="Create" class="btn btn-success btn-sm shadow-sm">
+            <i class="fas fa-money-bill-wave fa-sm"></i> Yeni Ödeme
+        </a>
+    </div>
 
-    <!-- Filtreleme -->
-    <form method="get" class="mb-3">
-        <div class="input-group">
-            <input type="text" class="form-control" id="searchInput" placeholder="Müşteri adına göre ara...">
+    <!-- Ödeme Filtrele -->
+    <div class="card shadow mb-4">
+        <a href="#collapseFilter" class="d-block card-header py-3" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapseFilter">
+            <h6 class="m-0 font-weight-bold text-success">Filtrele</h6>
+        </a>
+        <div class="collapse" id="collapseFilter">
+            <div class="card-body">
+                <form id="filterForm" method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="clientId" class="form-label">Müşteri</label>
+                        <select id="clientId" name="clientId" class="form-select">
+                            <option value="">Tümü</option>
+                            @foreach (var client in ViewBag.Clients ?? new SelectList(new List<SelectListItem>()))
+                            {
+                                <option value="@client.Value">@client.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="startDate" class="form-label">Başlangıç Tarihi</label>
+                        <input type="date" id="startDate" name="startDate" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label for="endDate" class="form-label">Bitiş Tarihi</label>
+                        <input type="date" id="endDate" name="endDate" class="form-control" />
+                    </div>
+                    <div class="col-md-2">
+                        <label for="currency" class="form-label">Para Birimi</label>
+                        <select id="currency" name="currency" class="form-select">
+                            <option value="">Tümü</option>
+                            <option value="0">RON</option>
+                            <option value="1">EUR</option>
+                            <option value="2">USD</option>
+                        </select>
+                    </div>
+                    <div class="col-12 text-end mt-3">
+                        <button type="reset" class="btn btn-secondary btn-sm">Temizle</button>
+                        <button type="submit" class="btn btn-success btn-sm">Filtrele</button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </form>
+    </div>
 
-    <a asp-action="Create" class="btn btn-primary mb-3">➕ Yeni Ödeme Ekle</a>
-
-    <table class="table table-bordered">
-        <thead class="table-dark">
-            <tr>
-                <th>Müşteri</th>
-                <th>Tutar</th>
-                <th>Para Birimi</th>
-                <th>Tarih</th>
-                <th>İşlemler</th>
-            </tr>
-        </thead>
-        <tbody id="paymentTableBody">
-            @foreach (var payment in Model)
-            {
-                <tr>
-                    <td>@payment.Client.CompanyName</td>
-                    <td>@payment.Amount.ToString("N2")</td>
-                    <td>@payment.Currency</td>
-                    <td>@payment.Date.ToShortDateString()</td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@payment.PaymentId" class="btn btn-warning">✏ Düzenle</a>
-                        <a asp-action="Delete" asp-route-id="@payment.PaymentId" class="btn btn-danger">🗑 Sil</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <!-- Ödeme Listesi Kartı -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-success">Ödeme Listesi</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="paymentsTable" class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Tarih</th>
+                            <th>Müşteri</th>
+                            <th>Tutar</th>
+                            <th>Para Birimi</th>
+                            <th>Açıklama</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var payment in Model)
+                        {
+                            <tr>
+                                <td>@payment.PaymentId</td>
+                                <td>@payment.Date.ToString("dd.MM.yyyy")</td>
+                                <td>
+                                    @if (payment.Client != null)
+                                    {
+                                        <a asp-controller="Client" asp-action="Details" asp-route-id="@payment.ClientId">
+                                            @payment.Client.CompanyName
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
+                                </td>
+                                <td class="text-right font-weight-bold">
+                                    @{
+                                        payment.CalculateAmount();
+                                    }
+                                    @payment.Amount.ToString("N2")
+                                </td>
+                                <td>
+                                    @if (payment.Currency == EntityLayer.Entities.Enums.CurrencyType.EUR)
+                                    {
+                                        <span class="badge bg-primary">EUR</span>
+                                    }
+                                    else if (payment.Currency == EntityLayer.Entities.Enums.CurrencyType.RON)
+                                    {
+                                        <span class="badge bg-success">RON</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info">USD</span>
+                                    }
+                                </td>
+                                <td>@(string.IsNullOrEmpty(payment.Description) ? "-" : payment.Description)</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@payment.PaymentId" class="btn btn-info btn-sm">
+                                            <i class="fas fa-info-circle"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@payment.PaymentId" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@payment.PaymentId" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
-    <script>
-        document.getElementById("searchInput").addEventListener("input", function () {
-            let searchText = this.value.toLowerCase();
-            let rows = document.querySelectorAll("#paymentTableBody tr");
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
 
-            rows.forEach(row => {
-                let clientName = row.cells[0].textContent.toLowerCase();
-                row.style.display = clientName.includes(searchText) ? "" : "none";
+    <script>
+        $(document).ready(function() {
+            $('#paymentsTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/tr.json'
+                },
+                "order": [[0, "desc"]],
+                "pageLength": 25
+            });
+
+            // URL'den parametre alma
+            function getUrlParameter(name) {
+                name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+                var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+                var results = regex.exec(location.search);
+                return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+            }
+
+            // Form değerlerini URL parametrelerinden doldur
+            $('#clientId').val(getUrlParameter('clientId'));
+            $('#startDate').val(getUrlParameter('startDate'));
+            $('#endDate').val(getUrlParameter('endDate'));
+            $('#currency').val(getUrlParameter('currency'));
+
+            // Reset butonu için
+            $("button[type='reset']").click(function() {
+                setTimeout(function() {
+                    window.location.href = window.location.pathname;
+                }, 10);
             });
         });
     </script>

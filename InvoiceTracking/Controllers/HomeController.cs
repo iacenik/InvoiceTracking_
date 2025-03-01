@@ -1,31 +1,60 @@
-using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
+﻿using BusinessLayer.Services;
 using InvoiceTracking.Models;
+using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
-namespace InvoiceTracking.Controllers;
-
-public class HomeController : Controller
+namespace InvoiceTracking.Controllers
 {
-    private readonly ILogger<HomeController> _logger;
-
-    public HomeController(ILogger<HomeController> logger)
+    public class HomeController : Controller
     {
-        _logger = logger;
-    }
+        private readonly ILogger<HomeController> _logger;
+        private readonly ICashRegisterService _cashRegisterService;
+        private readonly IClientService _clientService;
+        private readonly IInvoiceService _invoiceService;
 
-    public IActionResult Index()
-    {
-        return View();
-    }
+        public HomeController(
+            ILogger<HomeController> logger,
+            ICashRegisterService cashRegisterService,
+            IClientService clientService,
+            IInvoiceService invoiceService)
+        {
+            _logger = logger;
+            _cashRegisterService = cashRegisterService;
+            _clientService = clientService;
+            _invoiceService = invoiceService;
+        }
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
+        public async Task<IActionResult> Index()
+        {
+            var cashRegister = await _cashRegisterService.GetCashRegisterAsync();
+            var unpaidInvoices = await _invoiceService.GetUnpaidInvoicesAsync();
+            var clients = _clientService.GetAll();
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var dashboardViewModel = new DashboardViewModel
+            {
+                BalanceEUR = cashRegister?.BalanceEUR ?? 0,
+                BalanceRON = cashRegister?.BalanceRON ?? 0,
+                BalanceUSD = cashRegister?.BalanceUSD ?? 0,
+                TotalClients = clients.Count(),
+                TotalInvoices = (_invoiceService.GetAll()).Count(),
+                TotalUnpaidInvoices = unpaidInvoices.Count(),
+                TotalIncomeEUR = cashRegister?.TotalIncomeEUR ?? 0,
+                TotalExpenseEUR = cashRegister?.TotalExpenseEUR ?? 0
+            };
+
+            return View(dashboardViewModel);
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
     }
 }

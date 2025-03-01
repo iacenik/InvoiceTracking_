@@ -19,6 +19,7 @@ namespace EntityLayer.Entities
 
         [Required]
         public int CategoryId { get; set; } // Giderin kategorisi
+
         [ForeignKey("CategoryId")]
         public virtual ExpenseCategory? Category { get; set; } // 🔗 Gider kategorisi ile ilişki
 
@@ -29,6 +30,7 @@ namespace EntityLayer.Entities
 
         [Required]
         public int EmployeeId { get; set; } // Gideri yapan kişinin ID'si
+
         [ForeignKey("EmployeeId")]
         public virtual Employee? Employee { get; set; } // 🔗 Gideri yapan kişi ile ilişki
     }

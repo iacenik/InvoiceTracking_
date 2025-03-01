@@ -1,23 +1,67 @@
-﻿@model EntityLayer.Entities.Client
-
+﻿@* Views/Client/Delete.cshtml *@
+@model EntityLayer.Entities.Client
 @{
-    ViewData["Title"] = "Müşteri Sil";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Müşteri Sil - " + Model.CompanyName;
 }
 
-<div class="container mt-4">
-    <h2 class="text-danger text-center">Müşteri Sil</h2>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow border-danger mb-4">
+            <div class="card-header bg-danger text-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="m-0 font-weight-bold">Müşteriyi Sil</h5>
+                <a asp-action="Index" class="btn btn-light btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i> Listeye Dön
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Uyarı:</strong> Bu müşteriyi sildiğinizde, müşteriye ait tüm faturalar ve ödemeler de silinecektir. Bu işlem geri alınamaz!
+                </div>
 
-    <p class="text-center">Bu müşteriyi silmek istediğinize emin misiniz?</p>
+                <div class="table-responsive mt-4">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th style="width: 200px">Müşteri Kodu</th>
+                            <td><span class="badge bg-primary">@Model.ClientCode</span></td>
+                        </tr>
+                        <tr>
+                            <th>Şirket Adı</th>
+                            <td><strong>@Model.CompanyName</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Ülke</th>
+                            <td>@Model.Country</td>
+                        </tr>
+                        <tr>
+                            <th>Adres</th>
+                            <td>@(string.IsNullOrEmpty(Model.Address) ? "-" : Model.Address)</td>
+                        </tr>
+                        <tr>
+                            <th>Banka Adı</th>
+                            <td>@(string.IsNullOrEmpty(Model.BankName) ? "-" : Model.BankName)</td>
+                        </tr>
+                        <tr>
+                            <th>IBAN</th>
+                            <td>@(string.IsNullOrEmpty(Model.Iban) ? "-" : Model.Iban)</td>
+                        </tr>
+                        <tr>
+                            <th>Kayıt Tarihi</th>
+                            <td>@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                        </tr>
+                    </table>
+                </div>
 
-    <h4 class="text-center"><strong>@Model.CompanyName</strong></h4>
-
-    <form asp-action="DeleteConfirmed" method="post">
-        <input type="hidden" asp-for="ClientId" />
-
-        <div class="text-center mt-4">
-            <button type="submit" class="btn btn-danger">Sil</button>
-            <a asp-action="Index" class="btn btn-secondary">İptal</a>
+                <form asp-action="Delete" method="post" class="mt-4 text-center">
+                    <input type="hidden" asp-for="ClientId" />
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-times me-1"></i> İptal
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i> Müşteriyi Sil
+                    </button>
+                </form>
+            </div>
         </div>
-    </form>
+    </div>
 </div>

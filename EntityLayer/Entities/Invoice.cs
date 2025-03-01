@@ -18,11 +18,13 @@ namespace EntityLayer.Entities
 
         [Required]
         public int CategoryId { get; set; } // Gider kategorisi
+
         [ForeignKey("CategoryId")]
         public virtual ExpenseCategory? Category { get; set; }
 
         [Required]
         public int EmployeeId { get; set; }
+
         [ForeignKey("EmployeeId")]
         public virtual Employee? Employee { get; set; }
 
@@ -41,6 +43,7 @@ namespace EntityLayer.Entities
 
         [Required]
         public int ClientId { get; set; }
+
         [ForeignKey("ClientId")]
         public virtual Client? Client { get; set; }
 

@@ -1,96 +1,113 @@
 ﻿using BusinessLayer.Services;
 using EntityLayer.Entities;
+using InvoiceTracking.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
-namespace InvoiceSystem.Controllers
+namespace InvoiceTracking.Controllers
 {
     public class ClientController : Controller
     {
         private readonly IClientService _clientService;
+        private readonly IInvoiceService _invoiceService;
+        private readonly IPaymentService _paymentService;
 
-        public ClientController(IClientService clientService)
+        public ClientController(
+            IClientService clientService,
+            IInvoiceService invoiceService,
+            IPaymentService paymentService)
         {
             _clientService = clientService;
+            _invoiceService = invoiceService;
+            _paymentService = paymentService;
         }
 
-        // 📌 1️⃣ Tüm müşterileri listele
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var clients = await _clientService.GetAllClientsAsync();
+            var clients = _clientService.GetAll();
             return View(clients);
         }
 
-        // 📌 2️⃣ Yeni müşteri ekleme formu
+        public async Task<IActionResult> Details(int id)
+        {
+            var client = await _clientService.GetClientWithDetailsAsync(id);
+            if (client == null)
+            {
+                return NotFound();
+            }
+
+            var invoices = await _invoiceService.GetInvoicesByClientAsync(id);
+            var payments = await _paymentService.GetPaymentsByClientAsync(id);
+
+            var clientViewModel = new ClientViewModel
+            {
+                Client = client,
+                Invoices = invoices,
+                Payments = payments
+            };
+
+            return View(clientViewModel);
+        }
+
         public IActionResult Create()
         {
             return View();
         }
 
-        // 📌 3️⃣ Yeni müşteri ekleme işlemi
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Client client)
         {
             if (ModelState.IsValid)
             {
-                await _clientService.AddClientAsync(client);
+                await _clientService.AddAsync(client);
                 return RedirectToAction(nameof(Index));
             }
             return View(client);
         }
 
-        // 📌 4️⃣ Müşteri güncelleme formu
         public async Task<IActionResult> Edit(int id)
         {
-            var client = await _clientService.GetClientByIdAsync(id);
+            var client = await _clientService.GetByIdAsync(id);
             if (client == null)
+            {
                 return NotFound();
-
+            }
             return View(client);
         }
 
-        // 📌 5️⃣ Müşteri güncelleme işlemi
         [HttpPost]
-        public async Task<IActionResult> Edit(Client client)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Client client)
         {
+            if (id != client.ClientId)
+            {
+                return NotFound();
+            }
+
             if (ModelState.IsValid)
             {
-                await _clientService.UpdateClientAsync(client);
+                _clientService.Update(client);
                 return RedirectToAction(nameof(Index));
             }
             return View(client);
         }
 
-        // 📌 6️⃣ Müşteri silme işlemi
         public async Task<IActionResult> Delete(int id)
         {
-            var client = await _clientService.GetClientByIdAsync(id);
+            var client = await _clientService.GetByIdAsync(id);
             if (client == null)
+            {
                 return NotFound();
-
+            }
             return View(client);
         }
 
         [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _clientService.DeleteClientAsync(id);
+            _clientService.DeleteById(id);
             return RedirectToAction(nameof(Index));
-        }
-
-        // 📌 7️⃣ Müşteri faturalarını görüntüle
-        public async Task<IActionResult> Invoices(int clientId)
-        {
-            var invoices = await _clientService.GetClientInvoicesAsync(clientId);
-            return View(invoices);
-        }
-
-        // 📌 8️⃣ Müşteri ödemelerini görüntüle
-        public async Task<IActionResult> Payments(int clientId)
-        {
-            var payments = await _clientService.GetClientPaymentsAsync(clientId);
-            return View(payments);
         }
     }
 }

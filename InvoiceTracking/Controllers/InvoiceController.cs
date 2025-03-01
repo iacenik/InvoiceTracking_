@@ -1,137 +1,160 @@
 ﻿using BusinessLayer.Services;
 using EntityLayer.Entities;
+using InvoiceTracking.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using BusinessLayer.Common;
 
-namespace InvoiceSystem.Controllers
+namespace InvoiceTracking.Controllers
 {
     public class InvoiceController : Controller
     {
         private readonly IInvoiceService _invoiceService;
-        private readonly IClientService _clientService;
-        private readonly ICashRegisterService _cashRegisterService;
         private readonly IInvoiceDetailService _invoiceDetailService;
+        private readonly IClientService _clientService;
+        private readonly IEmployeeService _employeeService;
+        private readonly IExpenseCategoryService _categoryService;
+        private readonly IItemService _itemService;
+        private readonly ICashRegisterService _cashRegisterService;
 
         public InvoiceController(
             IInvoiceService invoiceService,
+            IInvoiceDetailService invoiceDetailService,
             IClientService clientService,
-            ICashRegisterService cashRegisterService,
-            IInvoiceDetailService invoiceDetailService)
+            IEmployeeService employeeService,
+            IExpenseCategoryService categoryService,
+            IItemService itemService,
+            ICashRegisterService cashRegisterService)
         {
             _invoiceService = invoiceService;
-            _clientService = clientService;
-            _cashRegisterService = cashRegisterService;
             _invoiceDetailService = invoiceDetailService;
+            _clientService = clientService;
+            _employeeService = employeeService;
+            _categoryService = categoryService;
+            _itemService = itemService;
+            _cashRegisterService = cashRegisterService;
         }
 
-        // 📌 1️⃣ Tüm faturaları listele
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var invoices = await _invoiceService.GetAllInvoicesAsync();
+            var invoices = _invoiceService.GetInvoicesWithDetails();
             return View(invoices);
         }
 
-        // 📌 2️⃣ Yeni fatura ekleme sayfası
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Details(int id)
         {
-            await PopulateDropDowns();
-            return View();
-        }
-
-        // 📌 3️⃣ Yeni fatura ekleme işlemi
-        [HttpPost]
-        public async Task<IActionResult> Create(Invoice invoice)
-        {
-            if (!ModelState.IsValid)
-            {
-                await PopulateDropDowns();
-                return View(invoice);
-            }
-
-            await _invoiceService.AddInvoiceAsync(invoice);
-            return RedirectToAction(nameof(Index));
-        }
-
-        // 📌 4️⃣ Fatura güncelleme sayfası
-        public async Task<IActionResult> Edit(int id)
-        {
-            var invoice = await _invoiceService.GetInvoicesByClientIdAsync(id);
+            var invoice = await _invoiceService.GetInvoiceWithDetailsAsync(id);
             if (invoice == null)
-                return NotFound();
-
-            await PopulateDropDowns(invoice.FirstOrDefault());
-            return View(invoice.FirstOrDefault());
-        }
-
-        // 📌 5️⃣ Fatura güncelleme işlemi
-        [HttpPost]
-        public async Task<IActionResult> Edit(Invoice invoice)
-        {
-            if (!ModelState.IsValid)
             {
-                await PopulateDropDowns(invoice);
-                return View(invoice);
+                return NotFound();
             }
-
-            await _invoiceService.UpdateInvoiceAsync(invoice);
-            return RedirectToAction(nameof(Index));
+            return View(invoice);
         }
 
-        // 📌 6️⃣ Fatura silme işlemi
-        public async Task<IActionResult> Delete(int id)
+        public IActionResult Create(int? clientId = null)
         {
-            var invoice = await _invoiceService.GetInvoicesByClientIdAsync(id);
-            if (invoice == null)
-                return NotFound();
+            ViewBag.Clients = new SelectList(_clientService.GetAll(), "ClientId", "CompanyName", clientId);
+            ViewBag.Employees = new SelectList(_employeeService.GetAll(), "EmployeeId", "EmployeeName");
+            ViewBag.Categories = new SelectList(_categoryService.GetAll(), "CategoryId", "CategoryName");
+            ViewBag.CurrencyTypes = new SelectList(Enum.GetValues(typeof(Enums.CurrencyType)));
+            ViewBag.InvoiceTypes = new SelectList(Enum.GetValues(typeof(Enums.InvoiceType)));
 
-            return View(invoice.FirstOrDefault());
-        }
-
-        [HttpPost, ActionName("Delete")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            await _invoiceService.DeleteInvoiceAsync(id);
-            return RedirectToAction(nameof(Index));
-        }
-
-        // 📌 7️⃣ Belirli bir müşteriye ait faturaları listeleme
-        public async Task<IActionResult> ClientInvoices(int clientId)
-        {
-            var invoices = await _invoiceService.GetInvoicesByClientIdAsync(clientId);
-            return View("Index", invoices);
-        }
-
-        // 📌 8️⃣ Fatura onaylama (Kasadan düşme işlemi)
-        public async Task<IActionResult> ApproveInvoice(int invoiceId)
-        {
-            var cashRegister = await _cashRegisterService.GetFirstAsync();
-            if (cashRegister == null)
+            var viewModel = new InvoiceViewModel
             {
-                ModelState.AddModelError("", "Kasa bulunamadı!");
+                ClientId = clientId ?? 0
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(InvoiceViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var invoice = new Invoice
+                {
+                    Date = viewModel.Date,
+                    CategoryId = viewModel.CategoryId,
+                    EmployeeId = viewModel.EmployeeId,
+                    ClientId = viewModel.ClientId,
+                    Currency = viewModel.Currency,
+                    InvoiceType = viewModel.InvoiceType,
+                    IsPaid = viewModel.IsPaid
+                };
+
+                var details = new List<InvoiceDetail>();
+                if (viewModel.Products != null && viewModel.Products.Count > 0)
+                {
+                    var invoiceDetail = new InvoiceDetail
+                    {
+                        Currency = viewModel.Currency
+                    };
+                    invoiceDetail.SetSoldProducts(viewModel.Products);
+                    details.Add(invoiceDetail);
+                }
+
+                await _invoiceService.CreateInvoiceWithDetailsAsync(invoice, details);
+
+                if (viewModel.IsPaid)
+                {
+                    await _invoiceService.ApproveInvoiceAsync(invoice.InvoiceId);
+                }
+
                 return RedirectToAction(nameof(Index));
             }
 
-            await _invoiceService.ApproveInvoiceAsync(invoiceId, cashRegister);
-            return RedirectToAction(nameof(Index));
+            ViewBag.Clients = new SelectList(_clientService.GetAll(), "ClientId", "CompanyName", viewModel.ClientId);
+            ViewBag.Employees = new SelectList(_employeeService.GetAll(), "EmployeeId", "EmployeeName", viewModel.EmployeeId);
+            ViewBag.Categories = new SelectList(_categoryService.GetAll(), "CategoryId", "CategoryName", viewModel.CategoryId);
+            ViewBag.CurrencyTypes = new SelectList(Enum.GetValues(typeof(Enums.CurrencyType)), viewModel.Currency);
+            ViewBag.InvoiceTypes = new SelectList(Enum.GetValues(typeof(Enums.InvoiceType)), viewModel.InvoiceType);
+
+            return View(viewModel);
         }
 
-        // 📌 9️⃣ Fatura detaylarını listeleme
-        public async Task<IActionResult> InvoiceDetails(int invoiceId)
+        [HttpPost]
+        public async Task<IActionResult> ApproveInvoice(int id)
         {
-            var details = await _invoiceDetailService.GetDetailsByInvoiceIdAsync(invoiceId);
-            return View(details);
+            var result = await _invoiceService.ApproveInvoiceAsync(id);
+            if (result)
+            {
+                return RedirectToAction(nameof(Details), new { id });
+            }
+            return NotFound();
         }
 
-        // 📌 🔥 Form dropdownlarını doldurma metodu
-        private async Task PopulateDropDowns(Invoice? invoice = null)
+        [HttpGet]
+        public async Task<IActionResult> AddInvoiceDetail(int invoiceId)
         {
-            var clients = await _clientService.GetAllClientsAsync();
-            ViewBag.Clients = new SelectList(clients, "ClientId", "CompanyName", invoice?.ClientId);
+            var invoice = await _invoiceService.GetByIdAsync(invoiceId);
+            if (invoice == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.Items = new SelectList( _itemService.GetAll(), "ItemId", "ItemName");
+            ViewBag.InvoiceId = invoiceId;
+            ViewBag.Currency = invoice.Currency;
+
+            return View(new InvoiceDetailViewModel { InvoiceId = invoiceId, Currency = invoice.Currency });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddInvoiceDetail(InvoiceDetailViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                await _invoiceDetailService.AddInvoiceDetailWithProductsAsync(viewModel.InvoiceId, viewModel.Products);
+                return RedirectToAction(nameof(Details), new { id = viewModel.InvoiceId });
+            }
+
+            ViewBag.Items = new SelectList( _itemService.GetAll(), "ItemId", "ItemName");
+            ViewBag.InvoiceId = viewModel.InvoiceId;
+            ViewBag.Currency = viewModel.Currency;
+
+            return View(viewModel);
         }
     }
 }

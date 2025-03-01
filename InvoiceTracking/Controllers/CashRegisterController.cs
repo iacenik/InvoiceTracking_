@@ -1,11 +1,8 @@
 ﻿using BusinessLayer.Services;
-using EntityLayer.Entities;
+using InvoiceTracking.Models;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
-using static EntityLayer.Entities.Enums;
 
-namespace InvoiceSystem.Controllers
+namespace InvoiceTracking.Controllers
 {
     public class CashRegisterController : Controller
     {
@@ -16,46 +13,46 @@ namespace InvoiceSystem.Controllers
             _cashRegisterService = cashRegisterService;
         }
 
-        // 📌 1️⃣ Kasa bilgilerini görüntüleme
         public async Task<IActionResult> Index()
         {
             var cashRegister = await _cashRegisterService.GetCashRegisterAsync();
-            if (cashRegister == null)
-            {
-                ModelState.AddModelError("", "Kasa bilgileri bulunamadı!");
-                return View(new CashRegister());
-            }
             return View(cashRegister);
         }
 
-        // 📌 2️⃣ Kasaya para ekleme (Gelir ekleme)
-        [HttpPost]
-        public async Task<IActionResult> AddIncome(decimal amount, CurrencyType currency)
+        [HttpGet]
+        public IActionResult AddIncome()
         {
-            if (amount <= 0)
-            {
-                ModelState.AddModelError("", "Geçerli bir tutar giriniz!");
-                return RedirectToAction(nameof(Index));
-            }
-
-            await _cashRegisterService.AddIncomeAsync(amount, currency);
-            TempData["SuccessMessage"] = "Gelir başarıyla eklendi!";
-            return RedirectToAction(nameof(Index));
+            return View(new CashRegisterViewModel());
         }
 
-        // 📌 3️⃣ Kasadan para düşme (Gider)
         [HttpPost]
-        public async Task<IActionResult> DeductExpense(decimal amount, CurrencyType currency)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddIncome(CashRegisterViewModel model)
         {
-            if (amount <= 0)
+            if (ModelState.IsValid)
             {
-                ModelState.AddModelError("", "Geçerli bir tutar giriniz!");
+                _cashRegisterService.AddIncome(model.Amount, model.Currency);
                 return RedirectToAction(nameof(Index));
             }
+            return View(model);
+        }
 
-            await _cashRegisterService.DeductExpenseAsync(amount, currency);
-            TempData["SuccessMessage"] = "Gider başarıyla düşüldü!";
-            return RedirectToAction(nameof(Index));
+        [HttpGet]
+        public IActionResult DeductExpense()
+        {
+            return View(new CashRegisterViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeductExpense(CashRegisterViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                _cashRegisterService.DeductExpense(model.Amount, model.Currency);
+                return RedirectToAction(nameof(Index));
+            }
+            return View(model);
         }
     }
 }

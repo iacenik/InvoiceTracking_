@@ -1,25 +1,63 @@
-﻿@model EntityLayer.Entities.Employee
-
+﻿@* Views/Employee/Create.cshtml *@
+@model EntityLayer.Entities.Employee
 @{
-    ViewData["Title"] = "Yeni Çalışan Ekle";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Yeni Çalışan";
 }
 
-<div class="container mt-4">
-    <h2 class="text-center">Yeni Çalışan Ekle</h2>
+<div class="container-fluid">
+    <!-- Sayfa Başlığı -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Yeni Çalışan</h1>
+        <a asp-action="Index" class="btn btn-secondary btn-sm shadow-sm">
+            <i class="fas fa-arrow-left fa-sm"></i> Listeye Dön
+        </a>
+    </div>
 
-    <form asp-action="Create" method="post" class="shadow p-4 bg-light rounded">
-        <div class="mb-3">
-            <label class="form-label">Ad</label>
-            <input asp-for="EmployeeName" class="form-control" required />
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Çalışan Ekle Kartı -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Çalışan Bilgileri</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="EmployeeName" class="form-label">Adı</label>
+                                    <input asp-for="EmployeeName" class="form-control" />
+                                    <span asp-validation-for="EmployeeName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="EmployeeSurname" class="form-label">Soyadı</label>
+                                    <input asp-for="EmployeeSurname" class="form-control" />
+                                    <span asp-validation-for="EmployeeSurname" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Kaydet
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> İptal
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-
-        <div class="mb-3">
-            <label class="form-label">Soyad</label>
-            <input asp-for="EmployeeSurname" class="form-control" required />
-        </div>
-
-        <button type="submit" class="btn btn-success">Kaydet</button>
-        <a asp-action="Index" class="btn btn-secondary">İptal</a>
-    </form>
+    </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

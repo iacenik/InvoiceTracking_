@@ -1,32 +1,97 @@
-﻿@model EntityLayer.Entities.Client
-
+﻿@* Views/Client/Edit.cshtml *@
+@model EntityLayer.Entities.Client
 @{
-    ViewData["Title"] = "Müşteri Güncelle";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Müşteri Düzenle - " + Model.CompanyName;
 }
 
-<div class="container mt-4">
-    <h2 class="text-center">Müşteri Güncelle</h2>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h5 class="m-0 font-weight-bold text-primary">Müşteriyi Düzenle</h5>
+                <div>
+                    <a asp-action="Details" asp-route-id="@Model.ClientId" class="btn btn-info btn-sm">
+                        <i class="fas fa-info-circle me-1"></i> Detaylar
+                    </a>
+                    <a asp-action="Index" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i> Listeye Dön
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                    <input type="hidden" asp-for="ClientId" />
+                    <input type="hidden" asp-for="CreatedAt" />
 
-    <form asp-action="Edit" method="post" class="shadow p-4 bg-light rounded">
-        <input type="hidden" asp-for="ClientId" />
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="ClientCode" class="form-label">Müşteri Kodu</label>
+                                <input asp-for="ClientCode" class="form-control" />
+                                <span asp-validation-for="ClientCode" class="text-danger"></span>
+                            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Firma Adı</label>
-            <input asp-for="CompanyName" class="form-control" required />
+                            <div class="form-group mb-3">
+                                <label asp-for="CompanyName" class="form-label">Şirket Adı</label>
+                                <input asp-for="CompanyName" class="form-control" />
+                                <span asp-validation-for="CompanyName" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="Country" class="form-label">Ülke</label>
+                                <select asp-for="Country" class="form-select">
+                                    <option value="">-- Ülke Seçin --</option>
+                                    <option value="Türkiye">Türkiye</option>
+                                    <option value="Romania">Romanya</option>
+                                    <option value="Germany">Almanya</option>
+                                    <option value="USA">ABD</option>
+                                    <option value="UK">İngiltere</option>
+                                    <option value="France">Fransa</option>
+                                    <option value="Italy">İtalya</option>
+                                    <option value="Spain">İspanya</option>
+                                    <option value="Netherlands">Hollanda</option>
+                                </select>
+                                <span asp-validation-for="Country" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="Address" class="form-label">Adres</label>
+                                <textarea asp-for="Address" class="form-control" rows="3"></textarea>
+                                <span asp-validation-for="Address" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="BankName" class="form-label">Banka Adı</label>
+                                <input asp-for="BankName" class="form-control" />
+                                <span asp-validation-for="BankName" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="Iban" class="form-label">IBAN</label>
+                                <input asp-for="Iban" class="form-control" />
+                                <span asp-validation-for="Iban" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Değişiklikleri Kaydet
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-times me-1"></i> İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
-
-        <div class="mb-3">
-            <label class="form-label">Ülke</label>
-            <input asp-for="Country" class="form-control" required />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">IBAN</label>
-            <input asp-for="Iban" class="form-control" />
-        </div>
-
-        <button type="submit" class="btn btn-primary">Güncelle</button>
-        <a asp-action="Index" class="btn btn-secondary">İptal</a>
-    </form>
+    </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

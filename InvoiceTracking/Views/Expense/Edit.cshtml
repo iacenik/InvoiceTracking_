@@ -1,33 +1,112 @@
-﻿@using static EntityLayer.Entities.Enums
-@model EntityLayer.Entities.Expense
-
+﻿@* Views/Expense/Edit.cshtml *@
+@model InvoiceTracking.Models.ExpenseViewModel
 @{
-    ViewData["Title"] = "Gider Güncelle";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Gider Düzenle";
 }
 
-<h2 class="text-center my-4">Gider Güncelle</h2>
+<div class="container-fluid">
+    <!-- Sayfa Başlığı -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Gider Düzenle</h1>
+        <div>
+            <a asp-action="Details" asp-route-id="@Model.ExpenseId" class="btn btn-info btn-sm shadow-sm">
+                <i class="fas fa-info-circle fa-sm"></i> Detaylar
+            </a>
+            <a asp-action="Index" class="btn btn-secondary btn-sm shadow-sm">
+                <i class="fas fa-arrow-left fa-sm"></i> Listeye Dön
+            </a>
+        </div>
+    </div>
 
-<div class="card shadow p-4">
-    <form asp-action="Edit">
-        <input type="hidden" asp-for="ExpenseId" />
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Gider Düzenle Kartı -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger">Gider Bilgileri</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                        <input type="hidden" asp-for="ExpenseId" />
 
-        <div class="row">
-            <div class="col-md-6">
-                <label class="form-label">Tutar</label>
-                <input asp-for="Amount" class="form-control" />
-                <span asp-validation-for="Amount" class="text-danger"></span>
-            </div>
-            <div class="col-md-6">
-                <label class="form-label">Para Birimi</label>
-                <select asp-for="Currency" asp-items="Html.GetEnumSelectList<CurrencyType>()" class="form-select"></select>
-                <span asp-validation-for="Currency" class="text-danger"></span>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Amount" class="form-label">Tutar</label>
+                                    <div class="input-group">
+                                        <input asp-for="Amount" class="form-control" />
+                                        <span class="input-group-text"><i class="fas fa-money-bill"></i></span>
+                                    </div>
+                                    <span asp-validation-for="Amount" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Currency" class="form-label">Para Birimi</label>
+                                    <select asp-for="Currency" class="form-select" asp-items="Html.GetEnumSelectList<EntityLayer.Entities.Enums.CurrencyType>()">
+                                        <option value="">-- Para Birimi Seçin --</option>
+                                    </select>
+                                    <span asp-validation-for="Currency" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Date" class="form-label">Tarih</label>
+                                    <input asp-for="Date" class="form-control" type="date" />
+                                    <span asp-validation-for="Date" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="CategoryId" class="form-label">Kategori</label>
+                                    <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.Categories">
+                                        <option value="">-- Kategori Seçin --</option>
+                                    </select>
+                                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="EmployeeId" class="form-label">Çalışan</label>
+                                    <select asp-for="EmployeeId" class="form-select" asp-items="ViewBag.Employees">
+                                        <option value="">-- Çalışan Seçin --</option>
+                                    </select>
+                                    <span asp-validation-for="EmployeeId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Description" class="form-label">Açıklama</label>
+                                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-save"></i> Değişiklikleri Kaydet
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> İptal
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-
-        <div class="mt-4 text-center">
-            <button type="submit" class="btn btn-warning">Güncelle</button>
-            <a asp-action="Index" class="btn btn-secondary">İptal</a>
-        </div>
-    </form>
+    </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

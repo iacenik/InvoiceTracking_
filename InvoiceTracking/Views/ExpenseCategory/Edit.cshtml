@@ -1,27 +1,64 @@
-﻿@model EntityLayer.Entities.ExpenseCategory
-
+﻿@* Views/ExpenseCategory/Edit.cshtml *@
+@model EntityLayer.Entities.ExpenseCategory
 @{
-    ViewData["Title"] = "Gider Kategorisi Güncelle";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Kategori Düzenle";
 }
 
-<div class="container mt-4">
-    <h2 class="text-center">Gider Kategorisi Güncelle</h2>
-
-    <form asp-action="Edit" method="post" class="shadow p-4 bg-light rounded">
-        <input type="hidden" asp-for="CategoryId" />
-
-        <div class="mb-3">
-            <label class="form-label">Kategori Adı</label>
-            <input asp-for="CategoryName" class="form-control" required />
+<div class="container-fluid">
+    <!-- Sayfa Başlığı -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Kategori Düzenle</h1>
+        <div>
+            <a asp-action="Details" asp-route-id="@Model.CategoryId" class="btn btn-info btn-sm shadow-sm">
+                <i class="fas fa-info-circle fa-sm"></i> Detaylar
+            </a>
+            <a asp-action="Index" class="btn btn-secondary btn-sm shadow-sm">
+                <i class="fas fa-arrow-left fa-sm"></i> Listeye Dön
+            </a>
         </div>
+    </div>
 
-        <div class="mb-3">
-            <label class="form-label">Açıklama</label>
-            <textarea asp-for="Description" class="form-control"></textarea>
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Kategori Düzenle Kartı -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Kategori Bilgileri</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                        <input type="hidden" asp-for="CategoryId" />
+
+                        <div class="mb-3">
+                            <label asp-for="CategoryName" class="form-label">Kategori Adı</label>
+                            <input asp-for="CategoryName" class="form-control" />
+                            <span asp-validation-for="CategoryName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Açıklama</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Değişiklikleri Kaydet
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> İptal
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-
-        <button type="submit" class="btn btn-primary">Güncelle</button>
-        <a asp-action="Index" class="btn btn-secondary">İptal</a>
-    </form>
+    </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

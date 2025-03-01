@@ -1,27 +1,69 @@
-﻿@model EntityLayer.Entities.Employee
-
+﻿@* Views/Employee/Edit.cshtml *@
+@model EntityLayer.Entities.Employee
 @{
-    ViewData["Title"] = "Çalışan Güncelle";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Çalışan Düzenle";
 }
 
-<div class="container mt-4">
-    <h2 class="text-center">Çalışan Güncelle</h2>
-
-    <form asp-action="Edit" method="post" class="shadow p-4 bg-light rounded">
-        <input type="hidden" asp-for="EmployeeId" />
-
-        <div class="mb-3">
-            <label class="form-label">Ad</label>
-            <input asp-for="EmployeeName" class="form-control" required />
+<div class="container-fluid">
+    <!-- Sayfa Başlığı -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Çalışan Düzenle</h1>
+        <div>
+            <a asp-action="Details" asp-route-id="@Model.EmployeeId" class="btn btn-info btn-sm shadow-sm">
+                <i class="fas fa-info-circle fa-sm"></i> Detaylar
+            </a>
+            <a asp-action="Index" class="btn btn-secondary btn-sm shadow-sm">
+                <i class="fas fa-arrow-left fa-sm"></i> Listeye Dön
+            </a>
         </div>
+    </div>
 
-        <div class="mb-3">
-            <label class="form-label">Soyad</label>
-            <input asp-for="EmployeeSurname" class="form-control" required />
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Çalışan Düzenle Kartı -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Çalışan Bilgileri</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                        <input type="hidden" asp-for="EmployeeId" />
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="EmployeeName" class="form-label">Adı</label>
+                                    <input asp-for="EmployeeName" class="form-control" />
+                                    <span asp-validation-for="EmployeeName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="EmployeeSurname" class="form-label">Soyadı</label>
+                                    <input asp-for="EmployeeSurname" class="form-control" />
+                                    <span asp-validation-for="EmployeeSurname" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Değişiklikleri Kaydet
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> İptal
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-
-        <button type="submit" class="btn btn-primary">Güncelle</button>
-        <a asp-action="Index" class="btn btn-secondary">İptal</a>
-    </form>
+    </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,21 +1,102 @@
-﻿@model EntityLayer.Entities.Expense
-
+﻿@* Views/Expense/Delete.cshtml *@
+@model EntityLayer.Entities.Expense
 @{
     ViewData["Title"] = "Gider Sil";
-    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2 class="text-center text-danger my-4">Gider Silme</h2>
+<div class="container-fluid">
+    <!-- Sayfa Başlığı -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Gider Sil</h1>
+        <a asp-action="Index" class="btn btn-secondary btn-sm shadow-sm">
+            <i class="fas fa-arrow-left fa-sm"></i> Listeye Dön
+        </a>
+    </div>
 
-<div class="card shadow p-4">
-    <h4 class="text-center text-danger">Bu gideri silmek istediğinizden emin misiniz?</h4>
-    <p class="text-center"><strong>@Model.Description</strong></p>
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Gider Sil Kartı -->
+            <div class="card shadow mb-4 border-left-danger">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger">Bu gideri silmek istediğinizden emin misiniz?</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Dikkat: Bu işlem geri alınamaz! Gideri silerseniz, ilgili kayıt tamamen sistemden silinecektir.
+                    </div>
 
-    <form asp-action="DeleteConfirmed">
-        <input type="hidden" asp-for="ExpenseId" />
-        <div class="text-center mt-3">
-            <button type="submit" class="btn btn-danger">Sil</button>
-            <a asp-action="Index" class="btn btn-secondary">İptal</a>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h5 class="font-weight-bold">Temel Bilgiler</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <th style="width: 150px;">Gider ID</th>
+                                            <td>@Model.ExpenseId</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Tarih</th>
+                                            <td>@Model.Date.ToString("dd.MM.yyyy")</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Tutar</th>
+                                            <td>
+                                                <span class="font-weight-bold">
+                                                    @Model.Amount.ToString("N2")
+                                                    @if (Model.Currency == EntityLayer.Entities.Enums.CurrencyType.EUR)
+                                                    {
+                                                        <span>€</span>
+                                                    }
+                                                    else if (Model.Currency == EntityLayer.Entities.Enums.CurrencyType.RON)
+                                                    {
+                                                        <span>RON</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>$</span>
+                                                    }
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h5 class="font-weight-bold">İlişkili Bilgiler</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <th style="width: 150px;">Kategori</th>
+                                            <td>@(Model.Category?.CategoryName ?? "-")</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Çalışan</th>
+                                            <td>@(Model.Employee != null ? $"{Model.Employee.EmployeeName} {Model.Employee.EmployeeSurname}" : "-")</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Açıklama</th>
+                                            <td>@(string.IsNullOrEmpty(Model.Description) ? "-" : Model.Description)</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form asp-action="Delete" method="post" class="mt-4 text-center">
+                        <input type="hidden" asp-for="ExpenseId" />
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> İptal
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Gideri Sil
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
-    </form>
+    </div>
 </div>

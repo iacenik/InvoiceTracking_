@@ -1,84 +1,351 @@
-﻿@model EntityLayer.Entities.CashRegister
-
+﻿@* Views/CashRegister/Index.cshtml *@
+@model EntityLayer.Entities.CashRegister
 @{
-    ViewData["Title"] = "Kasa Yönetimi";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Kasa Durumu";
 }
 
-<div class="container mt-4">
-    <h2 class="text-center">💰 Kasa Yönetimi</h2>
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Kasa Durumu</h1>
+        <div>
+            <a asp-action="AddIncome" class="btn btn-success btn-sm shadow-sm">
+                <i class="fas fa-plus-circle fa-sm"></i> Gelir Ekle
+            </a>
+            <a asp-action="DeductExpense" class="btn btn-danger btn-sm shadow-sm">
+                <i class="fas fa-minus-circle fa-sm"></i> Gider Ekle
+            </a>
+        </div>
+    </div>
 
-    <!-- Başarı Mesajı -->
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-    }
-
+    <!-- Kasa Bakiyeleri -->
     <div class="row">
-        <!-- 🔹 Mevcut Kasa Durumu -->
-        <div class="col-md-6">
-            <div class="card border-primary shadow">
-                <div class="card-header bg-primary text-white">📊 Kasa Durumu</div>
+        <!-- EUR Bakiyesi -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
-                    <ul class="list-group">
-                        <li class="list-group-item">Toplam Gelir (EUR): <strong>@Model.TotalIncomeEUR €</strong></li>
-                        <li class="list-group-item">Toplam Gider (EUR): <strong>@Model.TotalExpenseEUR €</strong></li>
-                        <li class="list-group-item text-success">Bakiye (EUR): <strong>@Model.BalanceEUR €</strong></li>
-                    </ul>
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">EUR Bakiyesi</div>
+                            <div class="h3 mb-0 font-weight-bold text-gray-800">@Model.BalanceEUR.ToString("N2") €</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-euro-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- 🔹 Gelir Ekleme Formu -->
-        <div class="col-md-6">
-            <div class="card border-success shadow">
-                <div class="card-header bg-success text-white">📥 Gelir Ekle</div>
+        <!-- RON Bakiyesi -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
-                    <form asp-action="AddIncome" method="post">
-                        <div class="form-group">
-                            <label>Tutar</label>
-                            <input type="number" name="amount" class="form-control" required>
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">RON Bakiyesi</div>
+                            <div class="h3 mb-0 font-weight-bold text-gray-800">@Model.BalanceRON.ToString("N2") RON</div>
                         </div>
-                        <div class="form-group mt-2">
-                            <label>Para Birimi</label>
-                            <select name="currency" class="form-control">
-                                <option value="EUR">EUR</option>
-                                <option value="RON">RON</option>
-                                <option value="USD">USD</option>
-                            </select>
+                        <div class="col-auto">
+                            <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
                         </div>
-                        <button type="submit" class="btn btn-success mt-3">
-                            <i class="fas fa-plus"></i> Gelir Ekle
-                        </button>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- 🔹 Gider Çıkarma Formu -->
-        <div class="col-md-6 mt-4">
-            <div class="card border-danger shadow">
-                <div class="card-header bg-danger text-white">📤 Gider Çıkar</div>
+        <!-- USD Bakiyesi -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
                 <div class="card-body">
-                    <form asp-action="DeductExpense" method="post">
-                        <div class="form-group">
-                            <label>Tutar</label>
-                            <input type="number" name="amount" class="form-control" required>
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">USD Bakiyesi</div>
+                            <div class="h3 mb-0 font-weight-bold text-gray-800">@Model.BalanceUSD.ToString("N2") $</div>
                         </div>
-                        <div class="form-group mt-2">
-                            <label>Para Birimi</label>
-                            <select name="currency" class="form-control">
-                                <option value="EUR">EUR</option>
-                                <option value="RON">RON</option>
-                                <option value="USD">USD</option>
-                            </select>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
                         </div>
-                        <button type="submit" class="btn btn-danger mt-3">
-                            <i class="fas fa-minus"></i> Gider Çıkar
-                        </button>
-                    </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detaylı Kasa Bilgileri -->
+    <div class="row">
+        <!-- EUR Detayları -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">EUR Detayları</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="eurPieChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-success"></i> Gelir: @Model.TotalIncomeEUR.ToString("N2") €
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-danger"></i> Gider: @Model.TotalExpenseEUR.ToString("N2") €
+                        </span>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <h4 class="small font-weight-bold">
+                            Kasa Doluluk Oranı <span class="float-right">
+                                @{
+                                    var utilization = 0;
+                                    if (Model.TotalIncomeEUR > 0)
+                                    {
+                                        utilization = (int)Math.Min(Math.Max(0, Model.BalanceEUR / Model.TotalIncomeEUR * 100), 100);
+                                    }
+                                }
+                                @utilization%
+                            </span>
+                        </h4>
+                        <div class="progress mb-4">
+                            <div class="progress-bar @(utilization < 30 ? "bg-danger" : (utilization < 70 ? "bg-warning" : "bg-success"))" role="progressbar" style="width: @utilization%"
+                                 aria-valuenow="@utilization" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RON Detayları -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-success">RON Detayları</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="ronPieChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-success"></i> Gelir: @Model.TotalIncomeRON.ToString("N2") RON
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-danger"></i> Gider: @Model.TotalExpenseRON.ToString("N2") RON
+                        </span>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <h4 class="small font-weight-bold">
+                            Kasa Doluluk Oranı <span class="float-right">
+                                @{
+                                    var utilizationRON = 0;
+                                    if (Model.TotalIncomeRON > 0)
+                                    {
+                                        utilizationRON = (int)Math.Min(Math.Max(0, Model.BalanceRON / Model.TotalIncomeRON * 100), 100);
+                                    }
+                                }
+                                @utilizationRON%
+                            </span>
+                        </h4>
+                        <div class="progress mb-4">
+                            <div class="progress-bar @(utilizationRON < 30 ? "bg-danger" : (utilizationRON < 70 ? "bg-warning" : "bg-success"))" role="progressbar" style="width: @utilizationRON%"
+                                 aria-valuenow="@utilizationRON" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- USD Detayları -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-info">USD Detayları</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="usdPieChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-success"></i> Gelir: @Model.TotalIncomeUSD.ToString("N2") $
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-danger"></i> Gider: @Model.TotalExpenseUSD.ToString("N2") $
+                        </span>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <h4 class="small font-weight-bold">
+                            Kasa Doluluk Oranı <span class="float-right">
+                                @{
+                                    var utilizationUSD = 0;
+                                    if (Model.TotalIncomeUSD > 0)
+                                    {
+                                        utilizationUSD = (int)Math.Min(Math.Max(0, Model.BalanceUSD / Model.TotalIncomeUSD * 100), 100);
+                                    }
+                                }
+                                @utilizationUSD%
+                            </span>
+                        </h4>
+                        <div class="progress mb-4">
+                            <div class="progress-bar @(utilizationUSD < 30 ? "bg-danger" : (utilizationUSD < 70 ? "bg-warning" : "bg-success"))" role="progressbar" style="width: @utilizationUSD%"
+                                 aria-valuenow="@utilizationUSD" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İşlem Özeti Tablosu -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Kasa Özeti</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Para Birimi</th>
+                                    <th>Toplam Gelir</th>
+                                    <th>Toplam Gider</th>
+                                    <th>Bakiye</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><i class="fas fa-euro-sign"></i> EUR</td>
+                                    <td class="text-success">@Model.TotalIncomeEUR.ToString("N2") €</td>
+                                    <td class="text-danger">@Model.TotalExpenseEUR.ToString("N2") €</td>
+                                    <td class="font-weight-bold @(Model.BalanceEUR >= 0 ? "text-success" : "text-danger")">
+                                        @Model.BalanceEUR.ToString("N2") €
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fas fa-money-bill-wave"></i> RON</td>
+                                    <td class="text-success">@Model.TotalIncomeRON.ToString("N2") RON</td>
+                                    <td class="text-danger">@Model.TotalExpenseRON.ToString("N2") RON</td>
+                                    <td class="font-weight-bold @(Model.BalanceRON >= 0 ? "text-success" : "text-danger")">
+                                        @Model.BalanceRON.ToString("N2") RON
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fas fa-dollar-sign"></i> USD</td>
+                                    <td class="text-success">@Model.TotalIncomeUSD.ToString("N2") $</td>
+                                    <td class="text-danger">@Model.TotalExpenseUSD.ToString("N2") $</td>
+                                    <td class="font-weight-bold @(Model.BalanceUSD >= 0 ? "text-success" : "text-danger")">
+                                        @Model.BalanceUSD.ToString("N2") $
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // EUR Pie Chart
+        var eurCtx = document.getElementById("eurPieChart");
+        var eurPieChart = new Chart(eurCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ["Gelir", "Gider"],
+                datasets: [{
+                    data: [@Model.TotalIncomeEUR, @Model.TotalExpenseEUR],
+                    backgroundColor: ['#1cc88a', '#e74a3b'],
+                    hoverBackgroundColor: ['#17a673', '#be3326'],
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                tooltips: {
+                    backgroundColor: "rgb(255,255,255)",
+                    bodyFontColor: "#858796",
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    xPadding: 15,
+                    yPadding: 15,
+                    displayColors: false,
+                    caretPadding: 10,
+                },
+                legend: {
+                    display: false
+                },
+                cutoutPercentage: 80,
+            },
+        });
+
+        // RON Pie Chart
+        var ronCtx = document.getElementById("ronPieChart");
+        var ronPieChart = new Chart(ronCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ["Gelir", "Gider"],
+                datasets: [{
+                    data: [@Model.TotalIncomeRON, @Model.TotalExpenseRON],
+                    backgroundColor: ['#1cc88a', '#e74a3b'],
+                    hoverBackgroundColor: ['#17a673', '#be3326'],
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                tooltips: {
+                    backgroundColor: "rgb(255,255,255)",
+                    bodyFontColor: "#858796",
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    xPadding: 15,
+                    yPadding: 15,
+                    displayColors: false,
+                    caretPadding: 10,
+                },
+                legend: {
+                    display: false
+                },
+                cutoutPercentage: 80,
+            },
+        });
+
+        // USD Pie Chart
+        var usdCtx = document.getElementById("usdPieChart");
+        var usdPieChart = new Chart(usdCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ["Gelir", "Gider"],
+                datasets: [{
+                    data: [@Model.TotalIncomeUSD, @Model.TotalExpenseUSD],
+                    backgroundColor: ['#1cc88a', '#e74a3b'],
+                    hoverBackgroundColor: ['#17a673', '#be3326'],
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                tooltips: {
+                    backgroundColor: "rgb(255,255,255)",
+                    bodyFontColor: "#858796",
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    xPadding: 15,
+                    yPadding: 15,
+                    displayColors: false,
+                    caretPadding: 10,
+                },
+                legend: {
+                    display: false
+                },
+                cutoutPercentage: 80,
+            },
+        });
+    </script>
+}

@@ -1,152 +1,426 @@
-﻿@model EntityLayer.Entities.CashRegister
-
+﻿@* Views/Home/Index.cshtml *@
+@model InvoiceTracking.Models.DashboardViewModel
 @{
-    ViewData["Title"] = "Kasa Durumu";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Ana Sayfa";
 }
 
-<h2 class="mb-4"><i class="fas fa-cash-register"></i> Kasa Durumu</h2>
+<div class="container-fluid">
+    <!-- Sayfa Başlığı -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Finansal Gösterge Paneli</h1>
+        <div>
+            <a asp-controller="Invoice" asp-action="Create" class="btn btn-primary btn-sm shadow-sm">
+                <i class="fas fa-file-invoice fa-sm"></i> Yeni Fatura
+            </a>
+            <a asp-controller="Payment" asp-action="Create" class="btn btn-success btn-sm shadow-sm">
+                <i class="fas fa-money-bill-wave fa-sm"></i> Yeni Ödeme
+            </a>
+            <a asp-controller="Expense" asp-action="Create" class="btn btn-danger btn-sm shadow-sm">
+                <i class="fas fa-hand-holding-usd fa-sm"></i> Yeni Gider
+            </a>
+        </div>
+    </div>
 
-<div class="row">
-    @if (Model != null)
-    {
-        <!-- EUR Kartları -->
-        <div class="col-md-4">
-            <div class="card shadow-sm animated-card bg-primary text-white">
-                <div class="card-header"><i class="fas fa-euro-sign"></i> EUR Gelir</div>
+    <!-- Para Birimi Bakiyeleri -->
+    <div class="row">
+        <!-- EUR Bakiyesi -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
-                    <h4 class="card-title amount" data-value="@Model.TotalIncomeEUR">@Model.TotalIncomeEUR.ToString("N2") €</h4>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm animated-card bg-danger text-white">
-                <div class="card-header"><i class="fas fa-euro-sign"></i> EUR Gider</div>
-                <div class="card-body">
-                    <h4 class="card-title amount" data-value="@Model.TotalExpenseEUR">@Model.TotalExpenseEUR.ToString("N2") €</h4>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm animated-card bg-success text-white">
-                <div class="card-header"><i class="fas fa-euro-sign"></i> EUR Bakiye</div>
-                <div class="card-body">
-                    <h4 class="card-title amount" data-value="@Model.BalanceEUR">@Model.BalanceEUR.ToString("N2") €</h4>
-                </div>
-            </div>
-        </div>
-
-        <!-- RON Kartları -->
-        <div class="col-md-4">
-            <div class="card shadow-sm animated-card bg-primary text-white">
-                <div class="card-header"><i class="fas fa-money-bill-wave"></i> RON Gelir</div>
-                <div class="card-body">
-                    <h4 class="card-title amount" data-value="@Model.TotalIncomeRON">@Model.TotalIncomeRON.ToString("N2") RON</h4>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm animated-card bg-danger text-white">
-                <div class="card-header"><i class="fas fa-money-bill-wave"></i> RON Gider</div>
-                <div class="card-body">
-                    <h4 class="card-title amount" data-value="@Model.TotalExpenseRON">@Model.TotalExpenseRON.ToString("N2") RON</h4>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm animated-card bg-success text-white">
-                <div class="card-header"><i class="fas fa-money-bill-wave"></i> RON Bakiye</div>
-                <div class="card-body">
-                    <h4 class="card-title amount" data-value="@Model.BalanceRON">@Model.BalanceRON.ToString("N2") RON</h4>
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">EUR Bakiyesi</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.BalanceEUR.ToString("N2") €</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-euro-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- USD Kartları -->
-        <div class="col-md-4">
-            <div class="card shadow-sm animated-card bg-primary text-white">
-                <div class="card-header"><i class="fas fa-dollar-sign"></i> USD Gelir</div>
+        <!-- RON Bakiyesi -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
-                    <h4 class="card-title amount" data-value="@Model.TotalIncomeUSD">@Model.TotalIncomeUSD.ToString("N2") $</h4>
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">RON Bakiyesi</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.BalanceRON.ToString("N2") RON</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm animated-card bg-danger text-white">
-                <div class="card-header"><i class="fas fa-dollar-sign"></i> USD Gider</div>
+
+        <!-- USD Bakiyesi -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
                 <div class="card-body">
-                    <h4 class="card-title amount" data-value="@Model.TotalExpenseUSD">@Model.TotalExpenseUSD.ToString("N2") $</h4>
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">USD Bakiyesi</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.BalanceUSD.ToString("N2") $</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm animated-card bg-success text-white">
-                <div class="card-header"><i class="fas fa-dollar-sign"></i> USD Bakiye</div>
+    </div>
+
+    <!-- İstatistik Kartları -->
+    <div class="row">
+        <!-- Toplam Müşteri Sayısı -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
-                    <h4 class="card-title amount" data-value="@Model.BalanceUSD">@Model.BalanceUSD.ToString("N2") $</h4>
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Toplam Müşteri</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalClients</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    }
-    else
-    {
-        <div class="alert alert-warning text-center">
-            <i class="fas fa-exclamation-triangle"></i> Kasa bilgisi bulunamadı. Lütfen bir kayıt ekleyin.
+
+        <!-- Toplam Fatura Sayısı -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Toplam Fatura</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalInvoices</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-file-invoice fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    }
+
+        <!-- Ödenmemiş Fatura Sayısı -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Ödenmemiş Fatura</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalUnpaidInvoices</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EUR Gelir-Gider -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Gelir/Gider (EUR)</div>
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-auto">
+                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">
+                                        @{
+                                            var ratio = Model.TotalExpenseEUR > 0 ? (int)(Math.Min(Model.TotalIncomeEUR / Model.TotalExpenseEUR * 100, 100)) : 100;
+                                        }
+                                        @ratio%
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="progress progress-sm mr-2">
+                                        <div class="progress-bar bg-danger" role="progressbar" style="width: @ratio%"
+                                             aria-valuenow="@ratio" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-percentage fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İçerik Satırı -->
+    <div class="row">
+        <!-- Aylık Gelir Grafiği -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Aylık Gelir (EUR)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="monthlyIncomeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Para Birimi Dağılımı -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Para Birimi Dağılımı</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="currencyDistributionChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-primary"></i> EUR
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-success"></i> RON
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-info"></i> USD
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İşlemler ve Hızlı Linkler -->
+    <div class="row">
+        <!-- Hızlı İşlemler -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Hızlı İşlemler</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <a asp-controller="Client" asp-action="Create" class="btn btn-primary btn-block">
+                                <i class="fas fa-user-plus fa-fw"></i> Yeni Müşteri
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a asp-controller="Employee" asp-action="Create" class="btn btn-info btn-block">
+                                <i class="fas fa-user-tie fa-fw"></i> Yeni Çalışan
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <a asp-controller="Invoice" asp-action="Create" class="btn btn-success btn-block">
+                                <i class="fas fa-file-invoice fa-fw"></i> Yeni Fatura
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a asp-controller="ExpenseCategory" asp-action="Create" class="btn btn-warning btn-block">
+                                <i class="fas fa-folder-plus fa-fw"></i> Yeni Kategori
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <a asp-controller="CashRegister" asp-action="AddIncome" class="btn btn-success btn-block">
+                                <i class="fas fa-plus-circle fa-fw"></i> Gelir Ekle
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a asp-controller="CashRegister" asp-action="DeductExpense" class="btn btn-danger btn-block">
+                                <i class="fas fa-minus-circle fa-fw"></i> Gider Ekle
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ödenmemiş Faturalar -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Ödenmemiş Faturalar</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.TotalUnpaidInvoices > 0)
+                    {
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i> Ödenmeyi bekleyen @Model.TotalUnpaidInvoices adet fatura bulunmaktadır.
+                        </div>
+                        <a asp-controller="Invoice" asp-action="Index" class="btn btn-warning btn-sm">
+                            <i class="fas fa-list"></i> Tüm Faturaları Görüntüle
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> Ödenmeyi bekleyen fatura bulunmamaktadır.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<a asp-action="Index" class="btn btn-secondary">
-    <i class="fas fa-arrow-left"></i> Geri Dön
-</a>
-
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Sayıların animasyonlu olarak artmasını sağla
-        document.addEventListener("DOMContentLoaded", function () {
-            let counters = document.querySelectorAll(".amount");
-            counters.forEach(counter => {
-                let target = parseFloat(counter.getAttribute("data-value"));
-                let start = 0;
-                let duration = 2000; // 2 saniyede tamamlanacak
-                let increment = target / (duration / 10);
+        // Aylık Gelir Grafiği
+        var monthlyCtx = document.getElementById("monthlyIncomeChart");
+        var monthlyLabels = [];
+        var monthlyData = [];
 
-                function updateCounter() {
-                    start += increment;
-                    if (start >= target) {
-                        counter.textContent = target.toLocaleString("tr-TR", { minimumFractionDigits: 2 }) + " " + counter.textContent.split(" ")[1];
-                    } else {
-                        counter.textContent = start.toLocaleString("tr-TR", { minimumFractionDigits: 2 }) + " " + counter.textContent.split(" ")[1];
-                        requestAnimationFrame(updateCounter);
+        @if (Model.MonthlyIncomeData != null && Model.MonthlyIncomeData.Any())
+        {
+            @foreach (var item in Model.MonthlyIncomeData)
+            {
+                @:monthlyLabels.push('@item.Label');
+                @:monthlyData.push(@item.Value);
+            }
+        }
+        else
+        {
+            @:monthlyLabels = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran'];
+            @:monthlyData = [0, 0, 0, 0, 0, 0];
+        }
+
+        var monthlyIncomeChart = new Chart(monthlyCtx, {
+            type: 'line',
+            data: {
+                labels: monthlyLabels,
+                datasets: [{
+                    label: "Gelir (EUR)",
+                    lineTension: 0.3,
+                    backgroundColor: "rgba(78, 115, 223, 0.05)",
+                    borderColor: "rgba(78, 115, 223, 1)",
+                    pointRadius: 3,
+                    pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                    pointBorderColor: "rgba(78, 115, 223, 1)",
+                    pointHoverRadius: 3,
+                    pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                    pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+                    pointHitRadius: 10,
+                    pointBorderWidth: 2,
+                    data: monthlyData,
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        left: 10,
+                        right: 25,
+                        top: 25,
+                        bottom: 0
+                    }
+                },
+                scales: {
+                    xAxes: [{
+                        time: {
+                            unit: 'date'
+                        },
+                        gridLines: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            maxTicksLimit: 7
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            maxTicksLimit: 5,
+                            padding: 10,
+                            callback: function(value, index, values) {
+                                return value + ' €';
+                            }
+                        },
+                        gridLines: {
+                            color: "rgb(234, 236, 244)",
+                            zeroLineColor: "rgb(234, 236, 244)",
+                            drawBorder: false,
+                            borderDash: [2],
+                            zeroLineBorderDash: [2]
+                        }
+                    }],
+                },
+                legend: {
+                    display: false
+                },
+                tooltips: {
+                    backgroundColor: "rgb(255,255,255)",
+                    bodyFontColor: "#858796",
+                    titleMarginBottom: 10,
+                    titleFontColor: '#6e707e',
+                    titleFontSize: 14,
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    xPadding: 15,
+                    yPadding: 15,
+                    displayColors: false,
+                    intersect: false,
+                    mode: 'index',
+                    caretPadding: 10,
+                    callbacks: {
+                        label: function(tooltipItem, chart) {
+                            var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+                            return datasetLabel + ': ' + tooltipItem.yLabel + ' €';
+                        }
                     }
                 }
-
-                updateCounter();
-            });
+            }
         });
 
-        // Kartlara yumuşak animasyon ekleyelim
-        document.addEventListener("DOMContentLoaded", function () {
-            let cards = document.querySelectorAll(".animated-card");
-            cards.forEach((card, index) => {
-                setTimeout(() => {
-                    card.classList.add("fade-in");
-                }, index * 150);
-            });
+        // Para Birimi Dağılımı Grafiği
+        var currencyCtx = document.getElementById("currencyDistributionChart");
+        var currencyData = [@Model.BalanceEUR, @Model.BalanceRON, @Model.BalanceUSD];
+
+        var currencyDistributionChart = new Chart(currencyCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ["EUR", "RON", "USD"],
+                datasets: [{
+                    data: currencyData,
+                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
+                    hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf'],
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                tooltips: {
+                    backgroundColor: "rgb(255,255,255)",
+                    bodyFontColor: "#858796",
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    xPadding: 15,
+                    yPadding: 15,
+                    displayColors: false,
+                    caretPadding: 10,
+                },
+                legend: {
+                    display: false
+                },
+                cutoutPercentage: 80,
+            },
         });
     </script>
-
-    <style>
-        /* Kartlara yumuşak animasyon efekti */
-        .animated-card {
-            transform: translateY(20px);
-            opacity: 0;
-            transition: transform 0.5s ease, opacity 0.5s ease;
-        }
-
-        .animated-card.fade-in {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    </style>
 }

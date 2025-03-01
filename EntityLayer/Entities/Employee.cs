@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EntityLayer.Entities
 {
-   public class Employee
+    public class Employee
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -19,7 +19,7 @@ namespace EntityLayer.Entities
 
         [Required]
         public string? EmployeeSurname { get; set; }
-        public virtual ICollection<Expense> Expenses { get; set; } = new List<Expense>(); // Çalışanın yaptığı giderler
 
+        public virtual ICollection<Expense> Expenses { get; set; } = new List<Expense>(); // Çalışanın yaptığı giderler
     }
 }

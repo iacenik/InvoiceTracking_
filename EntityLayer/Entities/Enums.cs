@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EntityLayer.Entities
 {
-   public  class Enums
+    public class Enums
     {
         public enum CurrencyType
         {
@@ -14,6 +14,7 @@ namespace EntityLayer.Entities
             EUR,
             USD
         }
+
         public enum InvoiceType
         {
             Normal,

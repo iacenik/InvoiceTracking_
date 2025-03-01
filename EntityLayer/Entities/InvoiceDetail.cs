@@ -17,6 +17,7 @@ namespace EntityLayer.Entities
 
         [Required]
         public int InvoiceId { get; set; }
+
         [ForeignKey("InvoiceId")]
         public virtual Invoice? Invoice { get; set; }
 

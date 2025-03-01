@@ -7,7 +7,7 @@ using static EntityLayer.Entities.Enums;
 
 namespace EntityLayer.Entities
 {
-    public   class SoldProduct
+    public class SoldProduct
     {
         public int ProductId { get; set; }
         public string ProductName { get; set; } = string.Empty;
@@ -15,6 +15,5 @@ namespace EntityLayer.Entities
         public int Quantity { get; set; }
         public decimal TotalPrice => UnitPrice * Quantity;
         public CurrencyType Currency { get; set; }
-
     }
 }
