@@ -3,6 +3,7 @@ using EntityLayer.Entities;
 using InvoiceTracking.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Newtonsoft.Json;
 
 namespace InvoiceTracking.Controllers
 {
@@ -68,8 +69,9 @@ namespace InvoiceTracking.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(InvoiceViewModel viewModel)
+        public async Task<IActionResult> Create([FromBody] object viewModelObject)
         {
+            InvoiceViewModel viewModel = JsonConvert.DeserializeObject<InvoiceViewModel>(viewModelObject.ToString());
             if (ModelState.IsValid)
             {
                 var invoice = new Invoice

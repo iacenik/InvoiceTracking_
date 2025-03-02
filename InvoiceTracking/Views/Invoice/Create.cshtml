@@ -149,7 +149,7 @@
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-block">
+                            <button type="submit" class="btn btn-primary btn-block" id="SubmitInvoice">
                                 <i class="fas fa-save"></i> Faturayı Kaydet
                             </button>
                             <a asp-action="Index" class="btn btn-secondary btn-block">
@@ -208,6 +208,7 @@
 
     <script>
         $(document).ready(function() {
+
             let products = [];
             let rowCounter = 0;
 
@@ -219,6 +220,16 @@
                 $('#quantity').val(1);
                 $('#addProductModal').modal('show');
             });
+
+            // Close Ürün Ekle Modal when İptal is clicked
+            $('#addProductModal').on('hidden.bs.modal', function() {
+                console.log('Modal is hidden');
+                $('#productId').val('');
+                $('#productName').val('');
+                $('#unitPrice').val('');
+                $('#quantity').val(1);
+            });
+
 
             // Ürün Seçimi Değiştiğinde
             $('#productId').change(function() {
@@ -289,39 +300,85 @@
             $('#Currency').change(function() {
                 updateTotals();
             });
+
+            // Ürün Satırını Kaldır
+            function removeProduct(rowId) {
+                $(`#row${rowId}`).remove();
+                products = products.filter(p => p.rowId !== rowId);
+                updateTotals();
+            }
+
+            // Toplamları Güncelle
+            function updateTotals() {
+                let total = 0;
+                $('#productRows tr').each(function () {
+                    let price = parseFloat($(this).find('td:eq(4)').text().split(' ')[0]);
+                    if (!isNaN(price)) {
+                        total += price;
+                    }
+                });
+
+                let currencySymbol = getCurrencySymbol();
+                $('#grandTotal').text(`${total.toFixed(2)} ${currencySymbol}`);
+                $('#previewTotal').text(`${total.toFixed(2)} ${currencySymbol}`);
+            }
+
+            // Para Birimi Sembolü
+            function getCurrencySymbol() {
+                let currency = $('#Currency').val();
+                switch (currency) {
+                    case "0": return "RON";
+                    case "1": return "€";
+                    case "2": return "$";
+                    default: return "";
+                }
+            }
+
+            $('#SubmitInvoice').click(function (e) {
+                e.preventDefault();
+                newProducts = products.map(p => {
+                    return {
+                        ProductId: p.ProductId,
+                        ProductName: p.ProductName,
+                        UnitPrice: p.UnitPrice,
+                        Quantity: p.Quantity,
+                        Currency: p.Currency
+                    };
+                });
+                viewModel = {
+                    Date: $('#Date').val(),
+                    ClientId: $('#ClientId').val(),
+                    CategoryId: $('#CategoryId').val(),
+                    EmployeeId: $('#EmployeeId').val(),
+                    Currency: $('#Currency').val(),
+                    InvoiceType: $('#InvoiceType').val(),
+                    IsPaid: $('#IsPaid').is(':checked'),
+                    Products: newProducts
+                };
+                console.log(viewModel);
+                $.ajax({
+                    url: '/Invoice/Create',
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(viewModel), // Direct model, not wrapped
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (response) {
+                        console.log(response);
+                        alert('Fatura başarıyla kaydedildi.');
+                        window.location.href = '/Invoice/Index';
+                    },
+                    error: function (err) {
+                        console.log(err); // Log the error details for debugging
+                        alert('Fatura kaydedilirken bir hata oluştu.');
+                    }
+                });
+
+            });
         });
 
-        // Ürün Satırını Kaldır
-        function removeProduct(rowId) {
-            $(`#row${rowId}`).remove();
-            products = products.filter(p => p.rowId !== rowId);
-            updateTotals();
-        }
+        
 
-        // Toplamları Güncelle
-        function updateTotals() {
-            let total = 0;
-            $('#productRows tr').each(function() {
-                let price = parseFloat($(this).find('td:eq(4)').text().split(' ')[0]);
-                if (!isNaN(price)) {
-                    total += price;
-                }
-            });
-
-            let currencySymbol = getCurrencySymbol();
-            $('#grandTotal').text(`${total.toFixed(2)} ${currencySymbol}`);
-            $('#previewTotal').text(`${total.toFixed(2)} ${currencySymbol}`);
-        }
-
-        // Para Birimi Sembolü
-        function getCurrencySymbol() {
-            let currency = $('#Currency').val();
-            switch (currency) {
-                case "0": return "RON";
-                case "1": return "€";
-                case "2": return "$";
-                default: return "";
-            }
-        }
     </script>
 }
