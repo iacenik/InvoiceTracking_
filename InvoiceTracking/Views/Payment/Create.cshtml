@@ -13,7 +13,8 @@
         </a>
     </div>
 
-    <form asp-action="Create" method="post">
+    <form asp-action="Create" method="post" id="paymentForm" onsubmit="submitForm(event)">
+        @Html.AntiForgeryToken()
         <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
         <div class="row">
@@ -47,10 +48,10 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label asp-for="Currency" class="form-label">Para Birimi</label>
-                                    <select asp-for="Currency" class="form-select" asp-items="ViewBag.CurrencyTypes">
+                                    <select asp-for="CurrencyString" class="form-select" asp-items="ViewBag.CurrencyTypes">
                                         <option value="">-- Para Birimi Seçin --</option>
                                     </select>
-                                    <span asp-validation-for="Currency" class="text-danger"></span>
+                                    <span asp-validation-for="CurrencyString" class="text-danger"></span>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -208,22 +209,21 @@
                 }
 
                 let totalPrice = unitPrice * quantity;
-                let currencySymbol = getCurrencySymbol();
 
                 // Ürün Dizisine Ekle
                 let product = {
-                    ProductId: productId,
-                    ProductName: productName,
-                    UnitPrice: unitPrice,
-                    Quantity: quantity,
-                    TotalPrice: totalPrice,
-                    Currency: $('#Currency').val()
+                    productId: parseInt(productId),
+                    productName: productName,
+                    unitPrice: unitPrice,
+                    quantity: quantity,
+                    totalPrice: totalPrice
                 };
 
                 products.push(product);
                 rowCounter++;
 
                 // Tabloyu Güncelle
+                let currencySymbol = getCurrencySymbol();
                 let newRow = `
                     <tr id="row${rowCounter}">
                         <td>${productId}</td>
@@ -232,14 +232,9 @@
                         <td class="text-center">${quantity}</td>
                         <td class="text-right">${totalPrice.toFixed(2)} ${currencySymbol}</td>
                         <td class="text-center">
-                            <button type="button" class="btn btn-danger btn-sm" onclick="removeProduct(${rowCounter})">
+                            <button type="button" class="btn btn-danger btn-sm" onclick="removeProduct(${rowCounter}, ${totalPrice})">
                                 <i class="fas fa-trash"></i>
                             </button>
-                            <input type="hidden" name="Products[${rowCounter}].ProductId" value="${productId}">
-                            <input type="hidden" name="Products[${rowCounter}].ProductName" value="${productName}">
-                            <input type="hidden" name="Products[${rowCounter}].UnitPrice" value="${unitPrice}">
-                            <input type="hidden" name="Products[${rowCounter}].Quantity" value="${quantity}">
-                            <input type="hidden" name="Products[${rowCounter}].Currency" value="${$('#Currency').val()}">
                         </td>
                     </tr>
                 `;
@@ -253,17 +248,84 @@
             });
 
             // Para Birimi Değiştiğinde
-            $('#Currency').change(function() {
+            $('#CurrencyString').change(function() {
                 updateTotals();
             });
-        });
+
+            // Form submit işlemi
+            window.submitForm = function(event) {
+                event.preventDefault();
+
+                if (products.length === 0) {
+                    alert('Lütfen en az bir ürün ekleyin.');
+                    return;
+                }
+
+                if (!$('#ClientId').val()) {
+                    alert('Lütfen müşteri seçiniz.');
+                    return;
+                }
+
+                if (!$('#CurrencyString').val()) {
+                    alert('Lütfen para birimi seçiniz.');
+                    return;
+                }
+
+                if (!$('#Date').val()) {
+                    alert('Lütfen tarih seçiniz.');
+                    return;
+                }
+                
+                var formData = {
+                    PaymentId: 0,
+                    ClientId: parseInt($('#ClientId').val()),
+                    CurrencyString: $('#CurrencyString').val(),
+                    Date: $('#Date').val(),
+                    Description: $('#Description').val() || "",
+                    Products: products.map(p => ({
+                        ProductId: p.productId,
+                        ProductName: p.productName,
+                        UnitPrice: p.unitPrice,
+                        Quantity: p.quantity,
+                        TotalPrice: p.totalPrice
+                    }))
+                };
+
+                console.log('Gönderilen veri:', formData);
+
+                // AJAX isteği
+                $.ajax({
+                    url: '@Url.Action("Create", "Payment")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        console.log('Sunucu yanıtı:', response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("Index", "Payment")';
+                        } else {
+                            alert('İşlem başarısız: ' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('XHR:', xhr);
+                        console.error('Status:', status);
+                        console.error('Error:', error);
+                        var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : 'Bir hata oluştu';
+                        alert(errorMessage);
+                    }
+                });
+            };
 
         // Ürün Satırını Kaldır
-        function removeProduct(rowId) {
+            window.removeProduct = function(rowId, price) {
             $(`#row${rowId}`).remove();
-            products = products.filter(p => p.rowId !== rowId);
+                products = products.filter((_, index) => index !== rowId - 1);
             updateTotals();
-        }
+            };
 
         // Toplamları Güncelle
         function updateTotals() {
@@ -282,13 +344,14 @@
 
         // Para Birimi Sembolü
         function getCurrencySymbol() {
-            let currency = $('#Currency').val();
+                let currency = $('#CurrencyString').val();
             switch (currency) {
-                case "0": return "RON";
-                case "1": return "€";
-                case "2": return "$";
+                    case "RON": return "RON";
+                    case "EUR": return "€";
+                    case "USD": return "$";
                 default: return "";
             }
         }
+        });
     </script>
 }

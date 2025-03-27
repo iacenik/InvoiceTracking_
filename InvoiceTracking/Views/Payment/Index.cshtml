@@ -1,8 +1,6 @@
 ﻿@* Views/Payment/Index.cshtml *@
 @model IEnumerable<EntityLayer.Entities.Payment>
-@{
-    ViewData["Title"] = "Ödemeler";
-}
+
 
 <div class="container-fluid">
     <!-- Sayfa Başlığı -->
@@ -94,12 +92,7 @@
                                         <span>-</span>
                                     }
                                 </td>
-                                <td class="text-right font-weight-bold">
-                                    @{
-                                        payment.CalculateAmount();
-                                    }
-                                    @payment.Amount.ToString("N2")
-                                </td>
+                                <td class="text-right font-weight-bold">@payment.TotalAmount.ToString("N2")</td>
                                 <td>
                                     @if (payment.Currency == EntityLayer.Entities.Enums.CurrencyType.EUR)
                                     {

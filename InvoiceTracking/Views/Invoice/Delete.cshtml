@@ -1,0 +1,106 @@
+@* Views/Invoice/Delete.cshtml *@
+@model EntityLayer.Entities.Invoice
+@{
+    ViewData["Title"] = "Fatura Sil";
+}
+
+<div class="container-fluid">
+    <!-- Sayfa Başlığı -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Fatura Sil</h1>
+        <a asp-action="Index" class="btn btn-secondary btn-sm shadow-sm">
+            <i class="fas fa-arrow-left fa-sm"></i> Listeye Dön
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Fatura Sil Kartı -->
+            <div class="card shadow mb-4 border-left-danger">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger">Bu faturayı silmek istediğinizden emin misiniz?</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Dikkat: Bu işlem geri alınamaz! Faturayı silerseniz, ilgili tüm detaylar da silinecektir.
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h5 class="font-weight-bold">Fatura Bilgileri</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <th style="width: 150px;">Fatura No</th>
+                                            <td>@Model.InvoiceId</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Tarih</th>
+                                            <td>@Model.Date.ToShortDateString()</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Toplam Tutar</th>
+                                            <td>@Model.TotalAmount @Model.Currency</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Durum</th>
+                                            <td>
+                                                @if (Model.IsPaid)
+                                                {
+                                                    <span class="badge bg-success text-white">Ödendi</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning text-dark">Ödenmedi</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h5 class="font-weight-bold">İlişkili Bilgiler</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <th style="width: 150px;">Müşteri</th>
+                                            <td>@(Model.Client?.CompanyName ?? "-")</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Kategori</th>
+                                            <td>@(Model.Category?.CategoryName ?? "-")</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Çalışan</th>
+                                            <td>@(Model.Employee != null ? $"{Model.Employee.EmployeeName} {Model.Employee.EmployeeSurname}" : "-")</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Detay Sayısı</th>
+                                            <td>
+                                                <span class="badge bg-info text-white">@Model.InvoiceDetails.Count</span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form asp-action="Delete" method="post" class="mt-4 text-center">
+                        <input type="hidden" asp-for="InvoiceId" />
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> İptal
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Faturayı Sil
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

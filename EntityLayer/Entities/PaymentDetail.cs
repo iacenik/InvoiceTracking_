@@ -1,4 +1,4 @@
-﻿    using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -27,29 +27,16 @@ namespace EntityLayer.Entities
         public CurrencyType Currency { get; set; } = CurrencyType.EUR;
 
         [NotMapped]
-        public decimal TotalAmount { get; private set; } = 0m;
-
-        [NotMapped]
         public List<SoldProduct> SoldProductsList => string.IsNullOrWhiteSpace(SoldProducts)
             ? new List<SoldProduct>()
             : JsonSerializer.Deserialize<List<SoldProduct>>(SoldProducts) ?? new List<SoldProduct>();
 
-        public void CalculateTotalAmount()
-        {
-            try
-            {
-                TotalAmount = SoldProductsList.Sum(p => p.TotalPrice);
-            }
-            catch (JsonException)
-            {
-                TotalAmount = 0;
-            }
-        }
+        [NotMapped]
+        public decimal TotalAmount => SoldProductsList.Sum(p => p.TotalPrice);
 
         public void SetSoldProducts(List<SoldProduct> products)
         {
             SoldProducts = JsonSerializer.Serialize(products);
-            CalculateTotalAmount();
         }
     }
 }

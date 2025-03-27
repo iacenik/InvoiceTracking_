@@ -1,25 +1,27 @@
 ﻿using EntityLayer.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 
 namespace DataAccessLayer.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
         {
         }
 
-        public DbSet<CashRegister> CashRegisters { get; set; }
-        public DbSet<Client> Clients { get; set; }
-        public DbSet<Employee> Employees { get; set; }
-        public DbSet<Expense> Expenses { get; set; }
-        public DbSet<ExpenseCategory> ExpenseCategories { get; set; }
         public DbSet<Invoice> Invoices { get; set; }
         public DbSet<InvoiceDetail> InvoiceDetails { get; set; }
+        public DbSet<Client> Clients { get; set; }
+        public DbSet<Employee> Employees { get; set; }
         public DbSet<Item> Items { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<PaymentDetail> PaymentDetails { get; set; }
+        public DbSet<Expense> Expenses { get; set; }
+        public DbSet<ExpenseCategory> ExpenseCategories { get; set; }
+        public DbSet<CashRegister> CashRegisters { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -174,7 +176,6 @@ namespace DataAccessLayer.Data
                     TotalExpenseUSD = 0m
                 }
             );
-
         }
     }
 }

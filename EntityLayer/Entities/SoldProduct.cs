@@ -13,7 +13,12 @@ namespace EntityLayer.Entities
         public string ProductName { get; set; } = string.Empty;
         public decimal UnitPrice { get; set; }
         public int Quantity { get; set; }
-        public decimal TotalPrice => UnitPrice * Quantity;
+        private decimal _totalPrice;
+        public decimal TotalPrice
+        {
+            get => UnitPrice * Quantity;
+            set => _totalPrice = value;
+        }
         public CurrencyType Currency { get; set; }
     }
 }

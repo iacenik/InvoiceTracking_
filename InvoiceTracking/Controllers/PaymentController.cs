@@ -3,6 +3,7 @@ using EntityLayer.Entities;
 using InvoiceTracking.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Newtonsoft.Json;
 
 namespace InvoiceTracking.Controllers
 {
@@ -47,11 +48,18 @@ namespace InvoiceTracking.Controllers
         public IActionResult Create(int? clientId = null)
         {
             ViewBag.Clients = new SelectList(_clientService.GetAll(), "ClientId", "CompanyName", clientId);
-            ViewBag.CurrencyTypes = new SelectList(Enum.GetValues(typeof(Enums.CurrencyType)));
+            ViewBag.CurrencyTypes = new SelectList(
+                Enum.GetValues(typeof(Enums.CurrencyType))
+                    .Cast<Enums.CurrencyType>()
+                    .Select(c => new { Id = c.ToString(), Name = c.ToString() }),
+                "Id",
+                "Name"
+            );
 
             var viewModel = new PaymentViewModel
             {
-                ClientId = clientId ?? 0
+                ClientId = clientId ?? 0,
+                Date = DateTime.Today
             };
 
             return View(viewModel);
@@ -59,16 +67,30 @@ namespace InvoiceTracking.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(PaymentViewModel viewModel)
+        public async Task<IActionResult> Create([FromBody] PaymentViewModel viewModel)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                return Json(new { success = false, message = "Geçersiz form verisi: " + string.Join(", ", errors) });
+            }
+
+            try
+            {
+                if (viewModel.ClientId == 0)
+                {
+                    return Json(new { success = false, message = "Lütfen müşteri seçiniz." });
+                }
+
                 var payment = new Payment
                 {
                     ClientId = viewModel.ClientId,
                     Currency = viewModel.Currency,
                     Date = viewModel.Date,
-                    Description = viewModel.Description
+                    Description = viewModel.Description ?? ""
                 };
 
                 var details = new List<PaymentDetail>();
@@ -81,15 +103,30 @@ namespace InvoiceTracking.Controllers
                     paymentDetail.SetSoldProducts(viewModel.Products);
                     details.Add(paymentDetail);
                 }
+                else
+                {
+                    return Json(new { success = false, message = "En az bir ürün eklemelisiniz." });
+                }
 
                 await _paymentService.CreatePaymentWithDetailsAsync(payment, details);
-                return RedirectToAction(nameof(Index));
+
+                // Kasa güncellemesi
+                var cashRegister = new CashRegister
+                {
+                    Date = payment.Date,
+                    Amount = payment.TotalAmount,
+                    Currency = payment.Currency,
+                    Description = $"Ödeme: {payment.Description}",
+                    TransactionType = Enums.TransactionType.Income
+                };
+                await _cashRegisterService.AddAsync(cashRegister);
+
+                return Json(new { success = true });
             }
-
-            ViewBag.Clients = new SelectList(_clientService.GetAll(), "ClientId", "CompanyName", viewModel.ClientId);
-            ViewBag.CurrencyTypes = new SelectList(Enum.GetValues(typeof(Enums.CurrencyType)), viewModel.Currency);
-
-            return View(viewModel);
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Ödeme kaydedilirken bir hata oluştu: " + ex.Message });
+            }
         }
 
         [HttpGet]
@@ -125,5 +162,45 @@ namespace InvoiceTracking.Controllers
             return View(viewModel);
         }
 
+        public async Task<IActionResult> Delete(int id)
+        {
+            var payment = await _paymentService.GetPaymentWithDetailsAsync(id);
+            if (payment == null)
+            {
+                return NotFound();
+            }
+            return View(payment);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var payment = await _paymentService.GetPaymentWithDetailsAsync(id);
+            if (payment == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                // Kasadan düşme işlemi
+                var cashRegister = await _cashRegisterService.GetCashRegisterAsync();
+                if (cashRegister != null)
+                {
+                    cashRegister.DeductIncome(payment.TotalAmount, payment.Currency);
+                    _cashRegisterService.Update(cashRegister);
+                }
+
+                _paymentService.DeleteById(id);
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Silme işlemi sırasında bir hata oluştu: {ex.Message}");
+                return View("Delete", payment);
+            }
+        }
     }
 }

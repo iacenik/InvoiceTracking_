@@ -14,7 +14,14 @@ namespace InvoiceTracking.Models
 
         [Required(ErrorMessage = "Para birimi seçimi zorunludur.")]
         [Display(Name = "Para Birimi")]
-        public CurrencyType Currency { get; set; }
+        public string CurrencyString { get; set; }
+
+        [Display(Name = "Para Birimi")]
+        public CurrencyType Currency 
+        { 
+            get => Enum.TryParse<CurrencyType>(CurrencyString, out var result) ? result : CurrencyType.RON;
+            set => CurrencyString = value.ToString();
+        }
 
         [Required(ErrorMessage = "Ödeme tarihi zorunludur.")]
         [Display(Name = "Ödeme Tarihi")]

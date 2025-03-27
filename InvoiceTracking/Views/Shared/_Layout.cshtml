@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 
 <head>
     <meta charset="utf-8">
@@ -34,13 +34,28 @@
                     <a href="@Url.Action("Index", "Home")" class="nav-link">Ana Sayfa</a>
                 </li>
             </ul>
+
+            <!-- Right navbar links -->
+            <ul class="navbar-nav ml-auto">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <li class="nav-item">
+                        <span class="nav-link">Merhaba @User.Identity.Name!</span>
+                    </li>
+                    <li class="nav-item">
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="form-inline">
+                            <button type="submit" class="btn btn-danger btn-sm">Çıkış Yap</button>
+                        </form>
+                    </li>
+                }
+            </ul>
         </nav>
 
         <!-- Sidebar -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <a href="@Url.Action("Index", "Home")" class="brand-link">
-                <img src="~/img/mone-plint.png" alt="Logo" class="brand-image img-circle elevation-3">
-                <span class="brand-text font-weight-light">Mone Panel</span>
+                <img src="~/img/mone-plint.png" alt="Mone Logo" class="brand-image" style="opacity: 1; max-height: 45px; margin-left: 0.2rem; margin-right: 0.2rem;">
+                <span class="brand-text font-weight-light" style="color: #e67e22;">Mone Panel</span>
             </a>
 
             <div class="sidebar">
@@ -110,7 +125,7 @@
 
         <!-- Footer -->
         <footer class="main-footer text-center">
-            <strong>&copy; 2025 <a href="https://mone.com">Mone</a></strong> | Tüm Hakları Saklıdır.
+            <strong>&copy; @DateTime.Now.Year <a href="#">Mone Panel</a></strong> | Tüm Hakları Saklıdır.
         </footer>
     </div>
 
@@ -118,9 +133,6 @@
     <script src="~/Admin/plugins/jquery/jquery.min.js"></script>
     <script src="~/Admin/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="~/Admin/dist/js/adminlte.min.js"></script>
-
-    <!-- **EKLENMESİ GEREKEN KOD** -->
-    @RenderSection("Scripts", required: false)
-
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -10,16 +10,22 @@ namespace EntityLayer.Entities
     {
         public enum CurrencyType
         {
-            RON,
-            EUR,
-            USD
+            RON = 1,
+            EUR = 2,
+            USD = 3
         }
 
         public enum InvoiceType
         {
-            Normal,
-            RO_FATURA,
-            C
+            Normal = 1,
+            RO_FATURA = 2,
+            C = 3
+        }
+
+        public enum TransactionType
+        {
+            Income = 1,
+            Expense = 2
         }
     }
 }

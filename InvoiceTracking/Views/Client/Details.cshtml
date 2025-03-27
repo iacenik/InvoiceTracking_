@@ -249,7 +249,7 @@
                                             <tr>
                                                 <td>@payment.PaymentId</td>
                                                 <td>@payment.Date.ToString("dd.MM.yyyy")</td>
-                                                <td class="text-end">@(payment.Amount.ToString("N2"))</td>
+                                                <td class="text-end">@(payment.TotalAmount.ToString("N2"))</td>
                                                 <td>@payment.Currency</td>
                                                 <td>@(string.IsNullOrEmpty(payment.Description) ? "-" : payment.Description)</td>
                                                 <td>

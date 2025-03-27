@@ -53,8 +53,36 @@ namespace EntityLayer.Entities
 
         public void SetSoldProducts(List<SoldProduct> products)
         {
+            if (products == null || !products.Any())
+            {
+                SoldProducts = "[]";
+                TotalAmount = 0;
+                return;
+            }
+
+            // Ürünlerin para birimini kontrol et ve güncelle
+            foreach (var product in products)
+            {
+                if (product.Currency != Currency)
+                {
+                    product.Currency = Currency;
+                }
+                Console.WriteLine($"Setting product in InvoiceDetail: Name={product.ProductName}, Price={product.UnitPrice}, Currency={product.Currency}, Total={product.TotalPrice}");
+            }
+
             SoldProducts = JsonSerializer.Serialize(products);
-            CalculateTotalAmount();
+            Console.WriteLine($"Serialized products: {SoldProducts}");
+
+            try
+            {
+                TotalAmount = products.Sum(p => p.TotalPrice);
+                Console.WriteLine($"Calculated TotalAmount: {TotalAmount}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error calculating total amount: {ex.Message}");
+                TotalAmount = 0;
+            }
         }
     }
 }

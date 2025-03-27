@@ -1,8 +1,9 @@
-﻿    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using static EntityLayer.Entities.Enums;
-    namespace EntityLayer.Entities
-    {
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using static EntityLayer.Entities.Enums;
+namespace EntityLayer.Entities
+{
     public class CashRegister
     {
         [Key]
@@ -37,9 +38,31 @@
         [NotMapped]
         public decimal BalanceUSD => TotalIncomeUSD - TotalExpenseUSD;
 
+        [Required]
+        public DateTime Date { get; set; }
+
+        [Required]
+        public decimal Amount { get; set; }
+
+        [Required]
+        public CurrencyType Currency { get; set; }
+
+        [Required]
+        [StringLength(500)]
+        public string Description { get; set; } = string.Empty;
+
+        [Required]
+        public TransactionType TransactionType { get; set; }
+
         // ✅ **Kasadan gider düşen yeni metot**
         public void DeductExpense(decimal amount, CurrencyType currency)
         {
+            Amount = amount;
+            Currency = currency;
+            TransactionType = TransactionType.Expense;
+            Date = DateTime.Now;
+            Description = $"Gider: {amount} {currency}";
+
             switch (currency)
             {
                 case CurrencyType.EUR:
@@ -57,6 +80,12 @@
         // ✅ **Kasaya gelir ekleyen yeni metot**
         public void AddIncome(decimal amount, CurrencyType currency)
         {
+            Amount = amount;
+            Currency = currency;
+            TransactionType = TransactionType.Income;
+            Date = DateTime.Now;
+            Description = $"Gelir: {amount} {currency}";
+
             switch (currency)
             {
                 case CurrencyType.EUR:
@@ -67,6 +96,29 @@
                     break;
                 case CurrencyType.USD:
                     TotalIncomeUSD += amount;
+                    break;
+            }
+        }
+
+        // ✅ **Kasadan gelir düşen yeni metot**
+        public void DeductIncome(decimal amount, CurrencyType currency)
+        {
+            Amount = amount;
+            Currency = currency;
+            TransactionType = TransactionType.Expense;
+            Date = DateTime.Now;
+            Description = $"Gelir İptali: {amount} {currency}";
+
+            switch (currency)
+            {
+                case CurrencyType.EUR:
+                    TotalIncomeEUR -= amount;
+                    break;
+                case CurrencyType.RON:
+                    TotalIncomeRON -= amount;
+                    break;
+                case CurrencyType.USD:
+                    TotalIncomeUSD -= amount;
                     break;
             }
         }

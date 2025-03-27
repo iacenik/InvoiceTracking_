@@ -13,7 +13,8 @@
         </a>
     </div>
 
-    <form asp-action="Create" method="post">
+    <form id="invoiceForm" asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
         <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
         <div class="row">
@@ -160,6 +161,11 @@
                 </div>
             </div>
         </div>
+
+        <!-- Products container for form submission -->
+        <div id="productsContainer">
+            <!-- Products will be added here dynamically -->
+        </div>
     </form>
 
     <!-- Ürün Ekleme Modal -->
@@ -234,14 +240,24 @@
                 let productName = $('#productName').val();
                 let unitPrice = parseFloat($('#unitPrice').val());
                 let quantity = parseInt($('#quantity').val());
+                let currency = $('#Currency').val();
 
-                if (!productName || isNaN(unitPrice) || isNaN(quantity) || unitPrice <= 0 || quantity <= 0) {
+                if (!productName || isNaN(unitPrice) || isNaN(quantity) || unitPrice <= 0 || quantity <= 0 || !currency) {
                     alert('Lütfen tüm alanları doğru şekilde doldurun.');
                     return;
                 }
 
                 let totalPrice = unitPrice * quantity;
-                let currencySymbol = getCurrencySymbol();
+
+                // Debug için loglama
+                console.log('Adding product:', {
+                    productId,
+                    productName,
+                    unitPrice,
+                    quantity,
+                    currency,
+                    totalPrice
+                });
 
                 // Ürün Dizisine Ekle
                 let product = {
@@ -250,62 +266,182 @@
                     UnitPrice: unitPrice,
                     Quantity: quantity,
                     TotalPrice: totalPrice,
-                    Currency: $('#Currency').val()
+                    Currency: currency
                 };
 
                 products.push(product);
                 rowCounter++;
 
-                // Tabloyu Güncelle
-                let newRow = `
+                // Debug için loglama
+                console.log('Products array after adding:', products);
+
+                // Tabloya Ekle
+                let currencySymbol = getCurrencySymbol();
+                $('#productRows').append(`
                     <tr id="row${rowCounter}">
                         <td>${productId}</td>
                         <td>${productName}</td>
-                        <td class="text-right">${unitPrice.toFixed(2)} ${currencySymbol}</td>
-                        <td class="text-center">${quantity}</td>
-                        <td class="text-right">${totalPrice.toFixed(2)} ${currencySymbol}</td>
-                        <td class="text-center">
+                        <td>${unitPrice.toFixed(2)} ${currencySymbol}</td>
+                        <td>${quantity}</td>
+                        <td>${totalPrice.toFixed(2)} ${currencySymbol}</td>
+                        <td>
                             <button type="button" class="btn btn-danger btn-sm" onclick="removeProduct(${rowCounter})">
                                 <i class="fas fa-trash"></i>
                             </button>
-                            <input type="hidden" name="Products[${rowCounter}].ProductId" value="${productId}">
-                            <input type="hidden" name="Products[${rowCounter}].ProductName" value="${productName}">
-                            <input type="hidden" name="Products[${rowCounter}].UnitPrice" value="${unitPrice}">
-                            <input type="hidden" name="Products[${rowCounter}].Quantity" value="${quantity}">
-                            <input type="hidden" name="Products[${rowCounter}].Currency" value="${$('#Currency').val()}">
                         </td>
                     </tr>
-                `;
-                $('#productRows').append(newRow);
+                `);
 
-                // Toplamı Güncelle
+                // Toplamları Güncelle
                 updateTotals();
+
+                // Form için ürünleri güncelle
+                updateProductsInForm();
 
                 // Modalı Kapat
                 $('#addProductModal').modal('hide');
             });
 
-            // Para Birimi Değiştiğinde
-            $('#Currency').change(function() {
+            // Ürün Silme
+            window.removeProduct = function(rowId) {
+                products.splice(rowId - 1, 1);
+                $(`#row${rowId}`).remove();
                 updateTotals();
-            });
-        });
+                updateProductsInForm();
+            };
 
-        // Ürün Satırını Kaldır
-        function removeProduct(rowId) {
-            $(`#row${rowId}`).remove();
-            products = products.filter(p => p.rowId !== rowId);
-            updateTotals();
+            // Update Products in Form
+            function updateProductsInForm() {
+                // Clear existing product inputs
+                $('#productsContainer').empty();
+
+                // Add new product inputs
+                products.forEach(function(product, index) {
+                    $('#productsContainer').append(`
+                        <input type="hidden" name="Products[${index}].ProductId" value="${product.ProductId}" />
+                        <input type="hidden" name="Products[${index}].ProductName" value="${product.ProductName}" />
+                        <input type="hidden" name="Products[${index}].UnitPrice" value="${product.UnitPrice}" />
+                        <input type="hidden" name="Products[${index}].Quantity" value="${product.Quantity}" />
+                        <input type="hidden" name="Products[${index}].TotalPrice" value="${product.TotalPrice}" />
+                        <input type="hidden" name="Products[${index}].Currency" value="${product.Currency}" />
+                    `);
+                });
+
+                // Debug için loglama
+                console.log('Products in form:', products);
+            }
+
+            // Form Submit
+            $('#invoiceForm').on('submit', function(e) {
+                e.preventDefault();
+
+                if (products.length === 0) {
+                    alert('Lütfen en az bir ürün ekleyin.');
+                    return;
+                }
+
+                // Form validation
+                let isValid = true;
+                let date = $('#Date').val();
+                let clientId = $('#ClientId').val();
+                let categoryId = $('#CategoryId').val();
+                let employeeId = $('#EmployeeId').val();
+                let currency = $('#Currency').val();
+                let invoiceType = $('#InvoiceType').val();
+                let isPaid = $('#IsPaid').is(':checked');
+
+                if (!date) {
+                    alert('Lütfen tarih seçiniz.');
+                    isValid = false;
+                }
+                if (!clientId) {
+                    alert('Lütfen müşteri seçiniz.');
+                    isValid = false;
+                }
+                if (!categoryId) {
+                    alert('Lütfen kategori seçiniz.');
+                    isValid = false;
+                }
+                if (!employeeId) {
+                    alert('Lütfen düzenleyen seçiniz.');
+                    isValid = false;
+                }
+                if (!currency) {
+                    alert('Lütfen para birimi seçiniz.');
+                    isValid = false;
+                }
+                if (!invoiceType) {
+                    alert('Lütfen fatura türü seçiniz.');
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    return;
+                }
+
+                // Para birimi değiştiğinde ürünlerin para birimini güncelle
+                products.forEach(function(product) {
+                    product.Currency = currency;
+                    console.log('Updated product currency:', product);
+                });
+
+                // Prepare data for submission
+                let data = {
+                    Date: date,
+                    ClientId: parseInt(clientId),
+                    CategoryId: parseInt(categoryId),
+                    EmployeeId: parseInt(employeeId),
+                    Currency: currency,
+                    InvoiceType: invoiceType,
+                    IsPaid: isPaid,
+                    Products: products
+                };
+
+                // Debug için loglama
+                console.log('Submitting data:', data);
+
+                // Get the anti-forgery token
+                let token = $('input[name="__RequestVerificationToken"]').val();
+
+                // Submit using AJAX
+                $.ajax({
+                    url: '@Url.Action("Create")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    headers: {
+                        'RequestVerificationToken': token
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            window.location.href = '@Url.Action("Index")';
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        alert('Bir hata oluştu: ' + error);
+                    }
+                });
+            });
+
+            // Para Birimi Sembolü
+            function getCurrencySymbol() {
+                let currency = $('#Currency').val();
+                switch (currency) {
+                    case "RON": return "RON";
+                    case "EUR": return "€";
+                    case "USD": return "$";
+                    default: return "";
+                }
         }
 
         // Toplamları Güncelle
         function updateTotals() {
             let total = 0;
-            $('#productRows tr').each(function() {
-                let price = parseFloat($(this).find('td:eq(4)').text().split(' ')[0]);
-                if (!isNaN(price)) {
-                    total += price;
-                }
+                products.forEach(function(product) {
+                    total += product.TotalPrice;
             });
 
             let currencySymbol = getCurrencySymbol();
@@ -313,15 +449,10 @@
             $('#previewTotal').text(`${total.toFixed(2)} ${currencySymbol}`);
         }
 
-        // Para Birimi Sembolü
-        function getCurrencySymbol() {
-            let currency = $('#Currency').val();
-            switch (currency) {
-                case "0": return "RON";
-                case "1": return "€";
-                case "2": return "$";
-                default: return "";
-            }
-        }
+            // Para birimi değiştiğinde
+            $('#Currency').change(function() {
+                updateTotals();
+            });
+        });
     </script>
 }

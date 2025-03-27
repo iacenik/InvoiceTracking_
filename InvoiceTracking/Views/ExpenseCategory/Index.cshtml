@@ -9,11 +9,17 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Gider Kategorileri</h1>
         <div>
-            <a asp-controller="Expense" asp-action="Index" class="btn btn-danger btn-sm shadow-sm">
+            <a asp-controller="Expense" asp-action="Index" class="btn btn-danger btn-sm shadow-sm me-1">
                 <i class="fas fa-arrow-left fa-sm"></i> Giderlere Dön
             </a>
-            <a asp-action="Create" class="btn btn-primary btn-sm shadow-sm">
+            <a asp-action="Create" class="btn btn-primary btn-sm shadow-sm me-1">
                 <i class="fas fa-plus fa-sm"></i> Yeni Kategori
+            </a>
+            <a asp-action="ExportToExcel" class="btn btn-success btn-sm shadow-sm me-1">
+                <i class="fas fa-file-excel"></i> Excel’e Aktar
+            </a>
+            <a asp-action="ExportToPdf" class="btn btn-secondary btn-sm shadow-sm">
+                <i class="fas fa-file-pdf"></i> PDF’e Aktar
             </a>
         </div>
     </div>
@@ -23,7 +29,7 @@
             <!-- Kategori Listesi Kartı -->
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Gider Kategorileri Listesi</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Kategoriler</h6>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -79,7 +85,7 @@
     <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#categoriesTable').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/tr.json'

@@ -1,4 +1,3 @@
-
 using BusinessLayer.Services;
 using DataAccessLayer.Concrete;
 using DataAccessLayer.Data;
@@ -6,6 +5,8 @@ using DataAccessLayer.Repository;
 using FluentAssertions.Common;
 using Microsoft.EntityFrameworkCore;
 using static DataAccessLayer.Repository.IGenericRepository;
+using Microsoft.AspNetCore.Identity;
+using EntityLayer.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,23 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Add Identity
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    // Şifre gereksinimlerini basitleştir
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredLength = 3;
+    
+    // SignIn ayarları
+    options.SignIn.RequireConfirmedAccount = false;
+    options.SignIn.RequireConfirmedEmail = false;
+})
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders();
 
 // Repository Register
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -64,10 +82,94 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Account}/{action=Login}/{id?}");
+
+// Admin kullanıcısını oluştur
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        var logger = services.GetRequiredService<ILogger<Program>>();
+
+        // Admin rolünü oluştur
+        if (!await roleManager.RoleExistsAsync("Admin"))
+        {
+            var roleResult = await roleManager.CreateAsync(new IdentityRole("Admin"));
+            if (roleResult.Succeeded)
+            {
+                logger.LogInformation("Admin rolü başarıyla oluşturuldu.");
+            }
+            else
+            {
+                logger.LogError("Admin rolü oluşturulurken hata: {Errors}", 
+                    string.Join(", ", roleResult.Errors.Select(e => e.Description)));
+            }
+        }
+
+        // Admin kullanıcısını oluştur
+        var adminUser = await userManager.FindByEmailAsync("ismetalpiso@gmail.com");
+        if (adminUser == null)
+        {
+            adminUser = new ApplicationUser
+            {
+                UserName = "ismetalpiso@gmail.com",
+                Email = "ismetalpiso@gmail.com",
+                EmailConfirmed = true
+            };
+
+            var result = await userManager.CreateAsync(adminUser, "ismet123");
+            if (result.Succeeded)
+            {
+                logger.LogInformation("Admin kullanıcısı başarıyla oluşturuldu.");
+                
+                var roleResult = await userManager.AddToRoleAsync(adminUser, "Admin");
+                if (roleResult.Succeeded)
+                {
+                    logger.LogInformation("Admin kullanıcısına Admin rolü başarıyla atandı.");
+                }
+                else
+                {
+                    logger.LogError("Admin kullanıcısına rol atanırken hata: {Errors}", 
+                        string.Join(", ", roleResult.Errors.Select(e => e.Description)));
+                }
+            }
+            else
+            {
+                logger.LogError("Admin kullanıcısı oluşturulurken hata: {Errors}", 
+                    string.Join(", ", result.Errors.Select(e => e.Description)));
+            }
+        }
+        else
+        {
+            logger.LogInformation("Admin kullanıcısı zaten mevcut. Kullanıcı adı: {UserName}", adminUser.UserName);
+            
+            // Şifreyi sıfırla
+            var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
+            var resetResult = await userManager.ResetPasswordAsync(adminUser, token, "ismet123");
+            if (resetResult.Succeeded)
+            {
+                logger.LogInformation("Admin kullanıcısının şifresi başarıyla sıfırlandı.");
+            }
+            else
+            {
+                logger.LogError("Admin kullanıcısının şifresi sıfırlanırken hata: {Errors}", 
+                    string.Join(", ", resetResult.Errors.Select(e => e.Description)));
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Admin kullanıcısı oluşturulurken hata oluştu.");
+    }
+}
 
 app.Run();

@@ -360,40 +360,87 @@ namespace BusinessLayer.Services
 
         public async Task<EntityLayer.Entities.Invoice> CreateInvoiceWithDetailsAsync(EntityLayer.Entities.Invoice invoice, List<EntityLayer.Entities.InvoiceDetail> details)
         {
-            await _invoiceRepository.AddAsync(invoice);
-            await _unitOfWork.CompleteAsync(); // Invoice ID oluşması için kaydet
-
-            foreach (var detail in details)
+            try
             {
-                detail.InvoiceId = invoice.InvoiceId;
-                await _invoiceDetailRepository.AddAsync(detail);
-            }
+                Console.WriteLine($"Creating invoice with {details?.Count ?? 0} details");
+                Console.WriteLine($"Invoice Currency: {invoice.Currency}");
 
-            await _unitOfWork.CompleteAsync();
-            return invoice;
+                await _invoiceRepository.AddAsync(invoice);
+                await _unitOfWork.CompleteAsync(); // Invoice ID oluşması için kaydet
+
+                Console.WriteLine($"Invoice created with ID: {invoice.InvoiceId}");
+
+                foreach (var detail in details)
+                {
+                    detail.InvoiceId = invoice.InvoiceId;
+                    detail.Currency = invoice.Currency; // Para birimini faturadan al
+                    
+                    // Ürünleri kontrol et
+                    var products = detail.SoldProductsList;
+                    Console.WriteLine($"Detail has {products.Count} products");
+                    foreach (var product in products)
+                    {
+                        Console.WriteLine($"Product before save: Name={product.ProductName}, Price={product.UnitPrice}, Currency={product.Currency}, Total={product.TotalPrice}");
+                    }
+
+                    await _invoiceDetailRepository.AddAsync(detail);
+                }
+
+                await _unitOfWork.CompleteAsync();
+
+                // Faturayı detaylarıyla birlikte tekrar yükle
+                var savedInvoice = await _invoiceRepository.GetInvoiceWithDetailsAsync(invoice.InvoiceId);
+                Console.WriteLine($"Saved invoice total amount: {savedInvoice?.TotalAmount ?? 0}");
+
+                return savedInvoice;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in CreateInvoiceWithDetailsAsync: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                throw;
+            }
         }
 
         public async Task<bool> ApproveInvoiceAsync(int invoiceId)
         {
-            var invoice = await _invoiceRepository.GetByIdAsync(invoiceId);
-            if (invoice == null || invoice.IsPaid)
+            try
             {
+                // Faturayı detaylarıyla birlikte al
+                var invoice = await _invoiceRepository.GetInvoiceWithDetailsAsync(invoiceId);
+                if (invoice == null || invoice.IsPaid)
+                {
+                    Console.WriteLine($"Invoice {invoiceId} is either null or already paid");
+                    return false;
+                }
+
+                // Kasayı al
+                var cashRegister = await _cashRegisterRepository.GetCashRegisterAsync();
+                if (cashRegister == null)
+                {
+                    Console.WriteLine("Cash register not found");
+                    return false;
+                }
+
+                // Tek transaction içinde hem faturayı hem kasayı güncelle
+                invoice.IsPaid = true;
+                _invoiceRepository.Update(invoice);
+
+                cashRegister.DeductExpense(invoice.TotalAmount, invoice.Currency);
+                _cashRegisterRepository.Update(cashRegister);
+
+                // Tek seferde kaydet
+                await _unitOfWork.CompleteAsync();
+
+                Console.WriteLine($"Invoice {invoiceId} approved and cash register updated: Amount={invoice.TotalAmount} {invoice.Currency}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in ApproveInvoiceAsync: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return false;
             }
-
-            var cashRegister = await _cashRegisterRepository.GetCashRegisterAsync();
-            if (cashRegister == null)
-            {
-                return false;
-            }
-
-            // Faturayı onayla ve kasadan düş
-            invoice.ApproveInvoice(cashRegister);
-            _invoiceRepository.Update(invoice);
-            _cashRegisterRepository.Update(cashRegister);
-
-            await _unitOfWork.CompleteAsync();
-            return true;
         }
     }
 
@@ -509,28 +556,25 @@ namespace BusinessLayer.Services
             await _paymentRepository.AddAsync(payment);
             await _unitOfWork.CompleteAsync(); // Payment ID oluşması için kaydet
 
-            decimal totalAmount = 0;
-
             // Ödeme detaylarını ekle
             foreach (var detail in details)
             {
                 detail.PaymentId = payment.PaymentId;
                 await _paymentDetailRepository.AddAsync(detail);
-                detail.CalculateTotalAmount();
-                totalAmount += detail.TotalAmount;
             }
+
+            await _unitOfWork.CompleteAsync();
+
+            // Güncel ödemeyi al (detaylarla birlikte)
+            payment = await _paymentRepository.GetPaymentWithDetailsAsync(payment.PaymentId);
 
             // Kasaya gelir ekle
             var cashRegister = await _cashRegisterRepository.GetCashRegisterAsync();
             if (cashRegister != null)
             {
-                cashRegister.AddIncome(totalAmount, payment.Currency);
+                cashRegister.AddIncome(payment.TotalAmount, payment.Currency);
                 _cashRegisterRepository.Update(cashRegister);
             }
-
-            // Ödeme toplamını hesapla
-            payment.CalculateAmount();
-            _paymentRepository.Update(payment);
 
             await _unitOfWork.CompleteAsync();
             return payment;
@@ -539,15 +583,7 @@ namespace BusinessLayer.Services
         public async Task<decimal> GetTotalPaymentsByClientAsync(int clientId, EntityLayer.Entities.Enums.CurrencyType currency)
         {
             var payments = await _paymentRepository.GetPaymentsByClientAsync(clientId);
-            decimal total = 0;
-
-            foreach (var payment in payments.Where(p => p.Currency == currency))
-            {
-                payment.CalculateAmount();
-                total += payment.Amount;
-            }
-
-            return total;
+            return payments.Where(p => p.Currency == currency).Sum(p => p.TotalAmount);
         }
     }
 

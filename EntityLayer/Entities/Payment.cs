@@ -24,6 +24,7 @@ namespace EntityLayer.Entities
 
         public DateTime Date { get; set; } = DateTime.Now; // Ödeme tarihi
 
+        [StringLength(500)]
         public string? Description { get; set; } // Açıklama (opsiyonel)
 
         // 🔗 Ödeme Detayları ile ilişki
@@ -31,11 +32,6 @@ namespace EntityLayer.Entities
 
         // 🔍 `Amount` otomatik hesaplanıyor (PaymentDetail toplamı)
         [NotMapped]
-        public decimal Amount { get; private set; } = 0m;
-
-        public void CalculateAmount() // 🔍 Setter olmadığı için hesaplamayı burada yapıyoruz
-        {
-            Amount = PaymentDetails?.Sum(pd => pd.TotalAmount) ?? 0;
-        }
+        public decimal TotalAmount => PaymentDetails?.Sum(pd => pd.TotalAmount) ?? 0;
     }
 }

@@ -14,11 +14,9 @@
             </a>
             @if (!Model.IsPaid)
             {
-                <form asp-action="ApproveInvoice" asp-route-id="@Model.InvoiceId" method="post" style="display: inline;">
-                    <button type="submit" class="btn btn-success btn-sm shadow-sm">
-                        <i class="fas fa-check-circle fa-sm"></i> Faturayı Onayla
-                    </button>
-                </form>
+                <button type="button" id="approveInvoiceBtn" class="btn btn-success btn-sm shadow-sm" onclick="approveInvoice(@Model.InvoiceId)">
+                    <i class="fas fa-check-circle fa-sm"></i> Faturayı Onayla
+                </button>
             }
             <a asp-action="AddInvoiceDetail" asp-route-invoiceId="@Model.InvoiceId" class="btn btn-warning btn-sm shadow-sm">
                 <i class="fas fa-plus fa-sm"></i> Detay Ekle
@@ -333,3 +331,30 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function approveInvoice(invoiceId) {
+            if (confirm('Faturayı onaylamak istediğinize emin misiniz? Bu işlem kasayı etkileyecektir.')) {
+                $.ajax({
+                    url: '@Url.Action("ApproveInvoice", "Invoice")',
+                    type: 'POST',
+                    data: { id: invoiceId },
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success(response.message);
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            toastr.error(response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        toastr.error('Bir hata oluştu: ' + error);
+                    }
+                });
+            }
+        }
+    </script>
+}
